@@ -7,14 +7,22 @@
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 ![Github All Releases](https://img.shields.io/github/downloads/gmgeorg/pypsps/total.svg)
 
+
+**IMPORTANT**: This is *NOT* ready for use.  This is just a prototype serving as basis of discussion in https://github.com/pytorch/pytorch/issues/108948. 
+
+This has not been properly tested w/ all pytorch functionality and should not be used other than for prototyping/R&D.
+
+---
+
+
 ```python
 import torchlambertw as tw
 import numpy as np
-special.lambertw(torch.tensor([0., 1., -np.exp(-1)]))
+special.lambertw(torch.tensor([-1., 0., 1., -np.exp(-1)]))
 ```
 output:
 ```bash
-tensor([ 0.0000,  0.5671, -1.0000], dtype=torch.float64)
+tensor([nan,  0.0000,  0.5671, -1.0000], dtype=torch.float64)
 ```
 
 As a more interesting example you can use this implementation to replicate the figure on the [Lambert W Function](https://en.wikipedia.org/wiki/Lambert_W_function) Wikipedia page:

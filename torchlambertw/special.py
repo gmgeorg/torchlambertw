@@ -20,6 +20,22 @@ _EXP_INV = np.exp(-1)
 _M_EXP_INV = -1 * _EXP_INV
 
 
+def xexp(x: torch.Tensor) -> torch.Tensor:
+    """Computes x * exp(x).
+
+    Lambert W function is defined as the inverse of this function. That is
+
+        W(z) * exp(W(z)) = z
+
+    Args:
+        x: tensor to transform.
+
+    Returns:
+        tensor of same shape as input, but x * exp(x)
+    """
+    return x * torch.exp(x)
+
+
 def _lambertw_winitzki_approx(z: torch.Tensor) -> torch.Tensor:
     """
     Computes Winitzki approximation to Lambert W function at z >= -1/exp(1).
