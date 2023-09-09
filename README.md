@@ -14,6 +14,9 @@ This has not been properly tested w/ all pytorch functionality and should not be
 
 ---
 
+## Lambert W function (math)
+
+Implementation of the Lambert W function (special function) in `torch`:
 
 ```python
 import torchlambertw as tw
@@ -60,8 +63,35 @@ plot_lambertW(-1, 6)
 ```
 ![Lambert W Function](imgs/lambertw_plot.png)
 
+## Lambert W x F distributions
 
-## Implementation
+```python
+from torchlambertw import distributions as tlwd
+
+# Implements a Lambert W x Normal distribution with (loc=1, scale=3, tailweight=0.75)
+m = tlwd.LambertWNormal(loc=torch.tensor([1.0]), 
+                        scale=torch.tensor([3.0]), 
+                        tailweight=torch.tensor([0.75]))
+m.sample((2,)) 
+```
+```
+tensor([[ 0.0159], [-0.9322]])
+```
+
+This distribution is quite heavy-tailed with moments existing only up to `1 / tailweight = 1.33`, ie this random variable / distribution has no variance.
+
+```python
+m.tailweight, m.support, m.mean, m.variance
+```
+```
+(tensor([0.7500]), Real(), tensor([1.]), tensor([inf]))
+```
+
+Let's draw a random sample from distribution
+
+
+
+## Details
 
 This implementation closely follows the TensorFlow Probability version in [`tfp.special.lambertw`](https://www.tensorflow.org/probability/api_docs/python/tfp/math/lambertw).
 
