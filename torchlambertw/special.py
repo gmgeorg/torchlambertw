@@ -100,7 +100,7 @@ def _lambertw_principal_branch_nonna(z):
         counter += 1
         stop_condition, w, z, _, _ = _halley_iteration(w, z, _EPS, counter)
 
-    # if z = _M_EXP_INV, return exactly -1.
+    # if z = _M_EXP_INV, return exactly -1. If z = Inf, return Inf
     return torch.where(torch.abs(z - _M_EXP_INV) < _EPS, -1 * torch.ones_like(z), w)
 
 
@@ -113,9 +113,42 @@ def _lambertw_principal_branch(z: torch.Tensor) -> torch.Tensor:
     return torch.where(torch.isposinf(z), torch.inf, w)
 
 
+def _lambertw_nonprincipal_branch_nonna(z: torch.Tensor) -> torch.Tensor:
+    """Computes the non-principal branch of z; only defined for z in [-1/exp(1), 0)."""
+    # See eq (4.19) of Corless et al. (1996).
+    L1 = torch.log(-z)
+    L1_sq = L1 * L1
+
+    L2 = torch.log(-L1)
+    L2_sq = L2 * L2
+
+    L3 = L2 / L1
+    w = (
+        L1
+        - L2
+        + L3
+        + L3 * (-2.0 + L2) / (2.0 * L1)
+        + (L3 * ((6.0 - 9.0 * L2 + 2 * L2_sq) / 6.0 * L1_sq))
+    )
+
+    stop_condition = False
+    counter = 0
+    while not stop_condition:
+        counter += 1
+        stop_condition, w, z, _, _ = _fritsch_iteration(w, z, _EPS, counter)
+    # if z = _M_EXP_INV, return exactly -1.
+    return torch.where(torch.abs(z - _M_EXP_INV) < _EPS, -1 * torch.ones_like(z), w)
+
+
 def _lambertw_nonprincipal_branch(z: torch.Tensor) -> torch.Tensor:
-    """Computes the non-principal branch of z."""
-    return _lambertw_principal_branch(z)
+    """Computes non-principal branch (-1) for z, denoted as Wm1(z).
+
+    For z < -1/exp(1), it returns nan; for z = inf, it returns inf.
+    """
+    # non-principal branch is only defined for [-1/exp(1), 0). For z->0 Wm1(z) = -Inf.
+    mask = (z >= _M_EXP_INV) & (z < 0.0)
+    w = torch.where(mask, _lambertw_nonprincipal_branch_nonna(z), torch.nan)
+    return torch.where(torch.abs(z) < _EPS, -1 * torch.inf, w)
 
 
 def lambertw(z: torch.Tensor, branch: int = 0) -> torch.Tensor:
@@ -123,10 +156,14 @@ def lambertw(z: torch.Tensor, branch: int = 0) -> torch.Tensor:
 
     Args:
         z: Value for which W(z) should be computed. Expected z >= -1/exp(1).
+
+    Returns:
+        W(z), a tensor of same shape and float dtype as input; with W(z, branch) values.
+        Potentially contains NA and +/- Inf values.
     """
-    if branch == 0:
+    if np.abs(branch) < _EPS:
         return _lambertw_principal_branch(z)
-    elif branch == -1:
+    elif np.abs(branch + 1) < _EPS:
         return _lambertw_nonprincipal_branch(z)
     else:
         raise NotImplementedError(f"branch={branch} is not implemented. Only 0 or -1.")
