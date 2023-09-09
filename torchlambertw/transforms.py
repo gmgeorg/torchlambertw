@@ -19,7 +19,7 @@ _EPS = torch.finfo(torch.float32).eps
 
 def H_gamma(u: torch.tensor, gamma: torch.tensor) -> torch.tensor:
     """Computes base transform for skewed Lambert W x F distributions (Goerg 2011)."""
-    return u * torch.tensor(gamma * u)
+    return u * torch.exp(gamma * u)
 
 
 def W_gamma(z: torch.tensor, gamma: torch.tensor, k: int) -> torch.tensor:
@@ -49,7 +49,7 @@ def W_delta(z: torch.tensor, delta: torch.tensor) -> torch.tensor:
     )
 
 
-# distribution transforms
+# Distribution transforms
 
 
 class LambertWTailTransform(td.transforms.Transform):
@@ -83,6 +83,48 @@ class LambertWTailTransform(td.transforms.Transform):
     def _inverse(self, y):
         z = (y - self.shift) / self.scale
         return W_delta(z, delta=self.tailweight) * self.scale + self.shift
+
+    # TODO:
+    def log_abs_det_jacobian(self, x, y):
+        raise NotImplementedError(
+            "Jacobian has not been implemented yet for LambertWTailTransform()."
+        )
+
+
+class LambertWSkewTransform(td.transforms.Transform):
+    r"""
+    Transform via the mapping :math:`y = x * \exp(gamma * x)`.
+    """
+    domain = td.constraints.real
+    codomain = td.constraints.real
+    bijective = False
+    sign = +1
+
+    def __init__(
+        self,
+        shift: torch.tensor,
+        scale: torch.tensor,
+        skewweight: torch.tensor,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.shift = shift
+        self.scale = scale
+        self.skewweight = skewweight
+
+    def __eq__(self, other):
+        return isinstance(other, LambertWSkewTransform)
+
+    def _call(self, x):
+        u = (x - self.shift) / self.scale
+        return H_gamma(u, gamma=self.skewweight) * self.scale + self.shift
+
+    def _inverse(self, y):
+        # Needs to use principal branch for inverse transformation; it's
+        # not entirely bijective but very low probability event of non-bijectivity
+        # for small gamma (approaches -> 0 for gamma -> 0).
+        z = (y - self.shift) / self.scale
+        return W_gamma(z, gamma=self.skewweight, k=0) * self.scale + self.shift
 
     # TODO:
     def log_abs_det_jacobian(self, x, y):
