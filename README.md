@@ -9,30 +9,36 @@
 
 ```python
 import torchlambertw as tw
-tw.special.lambertw(torch.tensor(0.))
+import numpy as np
+special.lambertw(torch.tensor([0., 1., -np.exp(-1)]))
+```
+output:
+```bash
+tensor([ 0.0000,  0.5671, -1.0000], dtype=torch.float64)
 ```
 
-Here to replicate the figure on the [Lambert W Function](https://en.wikipedia.org/wiki/Lambert_W_function) Wikipedia page:
+As a more interesting example you can use this implementation to replicate the figure on the [Lambert W Function](https://en.wikipedia.org/wiki/Lambert_W_function) Wikipedia page:
 
 ```python
-
 import numpy as np
 import matplotlib.pyplot as plt
 from torchlambertw import special
 
-def plot_lambertW(range_start, range_end, num_points=1000):
+def plot_lambertW(range_start, range_end, num_points=2000):
     x_values = np.linspace(range_start, range_end, num_points)
     x_values_torch = torch.tensor(x_values)
     principal_branch_values = special.lambertw(x_values_torch, k=0).numpy()
     non_principal_branch_values = special.lambertw(x_values_torch, k=-1).numpy()
     
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(8, 5))
     plt.plot(x_values, principal_branch_values, label="Principal Branch", color='blue')
     plt.plot(x_values, non_principal_branch_values, label="Non-Principal Branch", color='red')
     
     plt.title("Lambert W Function")
     plt.xlabel("x")
     plt.ylabel("W(x)")
+    plt.xlim(range_start, range_end)
+    plt.ylim(-4, 2)  # same range as wiki figure
     plt.axhline(0, color='black', linestyle='--', linewidth=0.5)
     plt.axvline(0, color='black', linestyle='--', linewidth=0.5)
     plt.legend()
@@ -41,7 +47,8 @@ def plot_lambertW(range_start, range_end, num_points=1000):
     plt.show()
 
 # Example usage:
-plot_lambertW(-2, 5)
+plot_lambertW(-1, 6)
+
 ```
 ![Lambert W Function](imgs/lambertw_plot.png)
 
