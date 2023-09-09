@@ -154,19 +154,20 @@ def _lambertw_nonprincipal_branch(z: torch.Tensor) -> torch.Tensor:
     return torch.where(torch.abs(z) < _EPS, -1 * torch.inf, w)
 
 
-def lambertw(z: torch.Tensor, branch: int = 0) -> torch.Tensor:
+def lambertw(z: torch.Tensor, k: int = 0) -> torch.Tensor:
     """Computes the Lambert W function of 'z' for principal (0) and non-principal (-1) branch.
 
     Args:
         z: Value for which W(z) should be computed. Expected z >= -1/exp(1).
+        k: branch; 0 for principal branch; -1 for non-principal branch.
 
     Returns:
-        W(z), a tensor of same shape and float dtype as input; with W(z, branch) values.
+        W(z), a tensor of same shape and float dtype as input; with W_{k}(z) values.
         Potentially contains NA and +/- Inf values.
     """
-    if np.abs(branch) < _EPS:
+    if np.abs(k) < _EPS:
         return _lambertw_principal_branch(z)
-    elif np.abs(branch + 1) < _EPS:
+    elif np.abs(k + 1) < _EPS:
         return _lambertw_nonprincipal_branch(z)
     else:
-        raise NotImplementedError(f"branch={branch} is not implemented. Only 0 or -1.")
+        raise NotImplementedError(f"`k={k}` branch is not implemented. Only 0 or -1.")

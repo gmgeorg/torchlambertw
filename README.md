@@ -9,8 +9,42 @@
 
 ```python
 import torchlambertw as tw
-tw.lambertw()
+tw.special.lambertw(torch.tensor(0.))
 ```
+
+Here to replicate the figure on the [Lambert W Function](https://en.wikipedia.org/wiki/Lambert_W_function) Wikipedia page:
+
+```python
+
+import numpy as np
+import matplotlib.pyplot as plt
+from torchlambertw import special
+
+def plot_lambertW(range_start, range_end, num_points=1000):
+    x_values = np.linspace(range_start, range_end, num_points)
+    x_values_torch = torch.tensor(x_values)
+    principal_branch_values = special.lambertw(x_values_torch, k=0).numpy()
+    non_principal_branch_values = special.lambertw(x_values_torch, k=-1).numpy()
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(x_values, principal_branch_values, label="Principal Branch", color='blue')
+    plt.plot(x_values, non_principal_branch_values, label="Non-Principal Branch", color='red')
+    
+    plt.title("Lambert W Function")
+    plt.xlabel("x")
+    plt.ylabel("W(x)")
+    plt.axhline(0, color='black', linestyle='--', linewidth=0.5)
+    plt.axvline(0, color='black', linestyle='--', linewidth=0.5)
+    plt.legend()
+    
+    plt.grid(True)
+    plt.show()
+
+# Example usage:
+plot_lambertW(-2, 5)
+```
+![Lambert W Function](imgs/lambertw_plot.png)
+
 
 ## Implementation
 
@@ -31,9 +65,6 @@ It can be installed directly from GitHub using:
 ```python
 pip install git+https://github.com/gmgeorg/torchlambertw.git
 ```
-
-
-# Code examples
 
 
 ## References
