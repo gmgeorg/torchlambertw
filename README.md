@@ -12,6 +12,8 @@
 
 This has not been properly tested w/ all pytorch functionality and should not be used other than for prototyping/R&D.
 
+See https://github.com/gmgeorg/torchlambertw/issues for remaining issues/TODOs.
+
 ---
 
 ## Lambert W function (math)
@@ -87,9 +89,24 @@ m.tailweight, m.support, m.mean, m.variance
 (tensor([0.7500]), Real(), tensor([1.]), tensor([inf]))
 ```
 
-Let's draw a random sample from distribution
+Let's draw a random sample from distribution and plot density / ecdfplot.
 
+```python
+torch.manual_seed(0)
+x = m.sample((1000,)).numpy().ravel()
 
+import seaborn as sns
+import statsmodels.api as sm
+
+sns.displot(x, kde=True)
+plt.show()
+sm.qqplot(x, line='45', fit=True)
+plt.grid()
+plt.show()
+```
+![Lambert W x Gaussian histogram and KDE](imgs/lambertw_gauss_hist_kde.png)
+
+![Lambert W x Gaussian qqnorm plot](imgs/lambertw_gauss_qqnorm.png)
 
 ## Details
 
