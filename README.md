@@ -139,7 +139,7 @@ plt.show()
 
 #### Back-transformation
 
-TODO: allow to estimate parameters from samples using MLE or Bayesian inference (see issue for adding Jacobian).
+TODO: allow to estimate parameters from samples using MLE or Bayesian inference (see https://github.com/gmgeorg/torchlambertw/issues/1).
 
 The parameters `(loc, scale, tailweight)` can be estimated from the data (see **LambertW** R package or also the `gaussianize` package for an **sklearn** wrapper).
 
