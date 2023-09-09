@@ -1,9 +1,12 @@
-"""Module for implementing the special function, Lambert W.
+"""A torch implementation of the Lambert W function.
 
 In special module to follow the style of scipy.special.* and tfp.special.*
 
 This implementation is a direct translation from TensorFlow Probability
 https://www.tensorflow.org/probability/api_docs/python/tfp/math/lambertw
+
+Vectorized, except for while loop. TODO to make this work in vectorized/GPU version
+(equivalent of tf.while_loop() in TensorFlow).
 """
 
 from typing import Tuple
