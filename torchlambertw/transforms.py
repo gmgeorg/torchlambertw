@@ -93,7 +93,9 @@ class LambertWTailTransform(td.transforms.Transform):
     def log_abs_det_jacobian(self, x, y):
         u_sq = self._normalize(x).pow(2.0)
         # absolute value not needed as all terms here are >= 0.
-        return (1 + self.tailweight * u_sq) * torch.exp(0.5 * self.tailweight * u_sq)
+        return torch.log(
+            (1 + self.tailweight * u_sq) * torch.exp(0.5 * self.tailweight * u_sq)
+        )
 
 
 class LambertWSkewTransform(td.transforms.Transform):
@@ -139,4 +141,6 @@ class LambertWSkewTransform(td.transforms.Transform):
 
     def log_abs_det_jacobian(self, x, y):
         u = self._normalize(x)
-        return torch.abs((self.skewweight * u + 1.0) * torch.exp(-self.skewweight * u))
+        return torch.log(
+            torch.abs((self.skewweight * u + 1.0) * torch.exp(-self.skewweight * u))
+        )
