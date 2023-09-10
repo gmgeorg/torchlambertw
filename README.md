@@ -106,7 +106,7 @@ m.sample((2,))
 tensor([[ 0.0159], [-0.9322]])
 ```
 
-This distribution is quite heavy-tailed with moments existing only up to `1 / tailweight = 1.33`, ie this random variable / distribution has no variance.
+This distribution is quite heavy-tailed with moments existing only up to `1 / tailweight = 1.33`, ie this random variable / distribution has infinite (population) variance.
 
 ```python
 m.tailweight, m.support, m.mean, m.variance
