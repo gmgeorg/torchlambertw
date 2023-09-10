@@ -76,19 +76,24 @@ class LambertWTailTransform(td.transforms.Transform):
     def __eq__(self, other):
         return isinstance(other, LambertWTailTransform)
 
+    def _normalize(self, input):
+        return (input - self.shift) / self.scale
+
+    def _inverse_normalize(self, output):
+        return (output * self.scale) + self.shift
+
     def _call(self, x):
-        u = (x - self.shift) / self.scale
-        return G_delta(u, delta=self.tailweight) * self.scale + self.shift
+        u = self._normalize(x)
+        return self._inverse_normalize(G_delta(u, delta=self.tailweight))
 
     def _inverse(self, y):
-        z = (y - self.shift) / self.scale
-        return W_delta(z, delta=self.tailweight) * self.scale + self.shift
+        z = self._normalize(y)
+        return self._inverse_normalize(W_delta(z, delta=self.tailweight))
 
-    # TODO:
     def log_abs_det_jacobian(self, x, y):
-        raise NotImplementedError(
-            "Jacobian has not been implemented yet for LambertWTailTransform()."
-        )
+        u_sq = self._normalize(x).pow(2.0)
+        # absolute value not needed as all terms here are >= 0.
+        return (1 + self.tailweight * u_sq) * torch.exp(0.5 * self.tailweight * u_sq)
 
 
 class LambertWSkewTransform(td.transforms.Transform):
@@ -115,19 +120,23 @@ class LambertWSkewTransform(td.transforms.Transform):
     def __eq__(self, other):
         return isinstance(other, LambertWSkewTransform)
 
+    def _normalize(self, input):
+        return (input - self.shift) / self.scale
+
+    def _inverse_normalize(self, output):
+        return (output * self.scale) + self.shift
+
     def _call(self, x):
-        u = (x - self.shift) / self.scale
-        return H_gamma(u, gamma=self.skewweight) * self.scale + self.shift
+        u = self._normalize(x)
+        return self._inverse_normalize(H_gamma(u, gamma=self.skewweight))
 
     def _inverse(self, y):
         # Needs to use principal branch for inverse transformation; it's
         # not entirely bijective but very low probability event of non-bijectivity
         # for small gamma (approaches -> 0 for gamma -> 0).
-        z = (y - self.shift) / self.scale
-        return W_gamma(z, gamma=self.skewweight, k=0) * self.scale + self.shift
+        z = self._normalize(y)
+        return self._inverse_normalize(W_gamma(z, gamma=self.skewweight, k=0))
 
-    # TODO:
     def log_abs_det_jacobian(self, x, y):
-        raise NotImplementedError(
-            "Jacobian has not been implemented yet for LambertWTailTransform()."
-        )
+        u = self._normalize(x)
+        return torch.abs((self.skewweight * u + 1.0) * torch.exp(-self.skewweight * u))
