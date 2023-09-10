@@ -2,10 +2,82 @@
 
 import torch
 
-# This is WIP.
 from . import special
 from . import transforms
 import torch.distributions as td
+
+
+class LambertWDistribution(td.transformed_distribution.TransformedDistribution):
+    r"""
+    Creates a heavy-tail Lambert W x Normal distribution parameterized by
+    `shift`, `scale`, and `tailweight` where::
+
+        X ~ F(shift, scale)
+        U = (X - shift) / scale
+        Z = U * exp(tailweight / 2. * U^2)
+        Y = Z * scale + shift
+        Y ~ Lambert W x F(shift, scale, tailweight)
+
+    Args:
+        shift (float or Tensor): location/shift parameter of the latent F distribution.
+          For (non-negative) scale-family distributions (e.g., exponential or gamma)
+          this should be set to 0.
+        scale (float or Tensor): scale parameter of latent F distribution
+        tailweight (float or Tensor): tailweight ("delta") of the Lambert W x F distribution.
+          If 0., then it reduces to a F(loc, scale) distribution.
+    """
+    arg_constraints = {
+        "shift": td.constraints.real,
+        "scale": td.constraints.positive,
+        "tailweight": td.constraints.greater_than_eq(0.0),
+    }
+    support = td.constraints.real
+    has_rsample = True
+
+    def __init__(
+        self,
+        base_distribution,
+        base_dist_args,
+        shift,
+        scale,
+        tailweight,
+        validate_args=None,
+    ):
+        self.tailweight = tailweight
+        self.shift = shift
+        super().__init__(
+            base_distribution=base_distribution(
+                **base_dist_args, validate_args=validate_args
+            ),
+            transforms=transforms.LambertWTailTransform(
+                shift=shift, scale=scale, tailweight=tailweight
+            ),
+            validate_args=validate_args,
+        )
+
+    def expand(self, batch_shape, _instance=None):
+        new = self._get_checked_instance(LambertWDistribution, _instance)
+        return super().expand(batch_shape, _instance=new)
+
+    @property
+    def loc(self):
+        return self.transforms[0].shift
+
+    @property
+    def scale(self):
+        return self.transforms[0].scale
+
+    @property
+    def mean(self):
+        pass
+
+    @property
+    def mode(self):
+        pass
+
+    @property
+    def variance(self):
+        pass
 
 
 class LambertWNormal(td.transformed_distribution.TransformedDistribution):
@@ -73,6 +145,79 @@ class LambertWNormal(td.transformed_distribution.TransformedDistribution):
         z_variance = 1.0 / torch.pow(1 - 2 * self.tailweight, 1.5)
         y_variance = z_variance * self.base_dist.scale.pow(2)
         return torch.where(y_variance > 0, y_variance, torch.inf)
+
+
+class SkewLambertWDistribution(td.transformed_distribution.TransformedDistribution):
+    r"""
+    Creates a skewed Lambert W x Normal distribution parameterized by
+    `shift`, `scale`, and `skewweight` where::
+
+        X ~ F(shift, scale)
+        U = (X - shift) / scale
+        Z = U * exp(skewweight * U)
+        Y = Z * scale + shift
+        Y ~ Lambert W x F(shift, scale, tailweight)
+
+    Args:
+        shift (float or Tensor): location/shift parameter of the latent F distribution.
+          For (non-negative) scale-family distributions (e.g., exponential or gamma)
+          this should be set to 0.
+        scale (float or Tensor): scale parameter of latent F distribution
+        tailweight (float or Tensor): tailweight ("delta") of the Lambert W x F distribution.
+          If 0., then it reduces to a F(shift, scale) distribution.
+    """
+    arg_constraints = {
+        "shift": td.constraints.real,
+        "scale": td.constraints.positive,
+        "skewweight": td.constraints.real,
+    }
+    support = td.constraints.real
+    has_rsample = True
+
+    def __init__(
+        self,
+        base_distribution,
+        base_dist_args,
+        shift,
+        scale,
+        skewweight,
+        validate_args=None,
+    ):
+        self.skewweight = skewweight
+        self.shift = shift
+        super().__init__(
+            base_distribution=base_distribution(
+                **base_dist_args, validate_args=validate_args
+            ),
+            transforms=transforms.LambertWSkewTransform(
+                shift=shift, scale=scale, skewweight=skewweight
+            ),
+            validate_args=validate_args,
+        )
+
+    def expand(self, batch_shape, _instance=None):
+        new = self._get_checked_instance(LambertWDistribution, _instance)
+        return super().expand(batch_shape, _instance=new)
+
+    @property
+    def loc(self):
+        return self.transforms[0].shift
+
+    @property
+    def scale(self):
+        return self.transforms[0].scale
+
+    @property
+    def mean(self):
+        pass
+
+    @property
+    def mode(self):
+        pass
+
+    @property
+    def variance(self):
+        pass
 
 
 class SkewLambertWNormal(td.transformed_distribution.TransformedDistribution):
