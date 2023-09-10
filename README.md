@@ -97,9 +97,9 @@ For the original papers see Goerg 2011 & 2015. If you want to jump into applicat
 from torchlambertw import distributions as tlwd
 
 # Implements a Lambert W x Normal distribution with (loc=1, scale=3, tailweight=0.75)
-m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]), 
-                            scale=torch.tensor([3.0]), 
-                            tailweight=torch.tensor([0.75]))
+m = tlwd.LambertWNormal(loc=torch.tensor([1.0]), 
+                        scale=torch.tensor([3.0]), 
+                        tailweight=torch.tensor([0.75]))
 m.sample((2,)) 
 ```
 ```
