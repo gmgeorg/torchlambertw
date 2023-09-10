@@ -9,7 +9,7 @@ Vectorized, except for while loop. TODO to make this work in vectorized/GPU vers
 (equivalent of tf.while_loop() in TensorFlow).
 """
 
-from typing import Tuple
+from typing import Tuple, Optional
 import torch
 import numpy as np
 
@@ -187,3 +187,14 @@ def lambertw(z: torch.Tensor, k: int = 0) -> torch.Tensor:
         return _lambertw_nonprincipal_branch(z)
     else:
         raise NotImplementedError(f"`k={k}` branch is not implemented. Only 0 or -1.")
+
+
+def lambertw_gradient(
+    z: torch.tensor, k: int = 0, w: Optional[torch.tensor] = None
+) -> torch.tensor:
+    """Computes the gradience of W(z)."""
+
+    if w is None:
+        w = lambertw(z, k=k)
+    dw_dz = w / (z * (1 + w))
+    return torch.where(torch.abs(z) < _EPS, torch.ones_like(z), dw_dz)
