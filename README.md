@@ -139,11 +139,9 @@ plt.show()
 
 #### Back-transformation
 
-TODO: allow to estimate parameters from samples using MLE or Bayesian inference (see https://github.com/gmgeorg/torchlambertw/issues/1).
+The parameters `(loc, scale, tailweight)` can be estimated from the data (see **LambertW** R package or also the `gaussianize` package for an **sklearn** wrapper) -- see also https://github.com/gmgeorg/torchlambertw/issues/2.
 
-The parameters `(loc, scale, tailweight)` can be estimated from the data (see **LambertW** R package or also the `gaussianize` package for an **sklearn** wrapper).
-
-Let's assume you have the parameters estimated (perfectly); then you can use this to obtain the unobserved, Gaussian data:
+Let's assume you have the parameters estimated; then you can use this to obtain the unobserved, Gaussian data:
 
 ```python
 torch.manual_seed(0)
@@ -224,17 +222,6 @@ This implementation closely follows the TensorFlow Probability version in [`tfp.
 See also [here](https://github.com/thibsej/unbalanced-ot-functionals/blob/13f2203b3993d973f929578085ea458c5c1a7a78/common/torch_lambertw.py) and [here](
 https://github.com/AminJun/BreakingCertifiableDefenses/blob/cc469fa48f7efba21f3584e233c4db0c9a4856c1/RandomizedSmoothing/projected_sinkhorn/lambertw.py
 )) for minimum example `pytorch` implementations.
-
-
-
-
-# Installation
-
-It can be installed directly from GitHub using:
-
-```python
-pip install git+https://github.com/gmgeorg/torchlambertw.git
-```
 
 
 ## References
