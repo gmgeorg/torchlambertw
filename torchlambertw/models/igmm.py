@@ -8,10 +8,12 @@ import numpy as np
 import warnings
 
 from . import w_transforms
+from . import base
 import scipy.optimize
 
 
 def kurtosis(x):
+    """Computes kurtosis of data.  For normal distribution this will be 3 (ie not excess kurtosis)."""
     return scipy.stats.kurtosis(x) + 3
 
 
@@ -40,17 +42,17 @@ def delta_taylor(
 
 
 def delta_gmm(
-    z,
-    type="h",
-    kurtosis_x=3,
-    skewness_x=0,
-    delta_init=None,
-    tol=np.finfo(float).eps ** 0.25,
-    not_negative=False,
-    lower=-1,
-    upper=3,
+    z: np.ndarray,
+    type: str = "h",
+    kurtosis_x: float = 3.0,
+    skewness_x: float = 0.0,
+    delta_init: Optional[float] = None,
+    tol: float = np.finfo(float).eps ** 0.25,
+    not_negative: bool = False,
+    lower: float = -1.0,
+    upper: float = 3.0,
 ):
-
+    """Computes an estimate of delta (tail parameter) per Taylor approximation of the kurtosis."""
     assert isinstance(kurtosis_x, (int, float))
     assert isinstance(skewness_x, (int, float))
     assert len(delta_init) <= 2 if delta_init is not None else True
@@ -86,24 +88,36 @@ def delta_gmm(
     if not_negative:
         delta_init = np.log(delta_init + 0.001)
 
-    if not not_negative:
-        res = scipy.optimize.minimize_scalar(
-            _obj_fct, bounds=(lower, upper), method="bounded", options={"xatol": tol}
-        )
-        delta_hat = res.x
-        iterations = res.nit
-    else:
+    delta_estimate: base.DeltaEstimate = None
+    if not_negative:
         res = scipy.optimize.minimize(
             _obj_fct, delta_init, method="BFGS", tol=tol, options={"disp": False}
         )
-        delta_hat = res.x
-        iterations = res.nit
+        delta_estimate = base.DeltaEstimate(
+            delta=res.x[0],
+            iterations=res.nit,
+            method="taylor",
+            converged=res.success,
+            optimizer_result=res,
+        )
+    else:
+        res = scipy.optimize.minimize_scalar(
+            _obj_fct, bounds=(lower, upper), method="bounded", options={"xatol": tol}
+        )
+        delta_estimate = base.DeltaEstimate(
+            delta=res.x,
+            iterations=res.nfev,
+            method="taylor",
+            converged=res.success,
+            optimizer_result=res,
+        )
 
+    delta_hat = delta_estimate.delta
     if not_negative:
         delta_hat = np.exp(delta_hat)
-        if np.linalg.norm(delta_hat, 1) < 1e-7:
+        if np.abs(delta_hat - 1) < 1e-7:
             delta_hat = np.round(delta_hat, 6)
 
     delta_hat = np.minimum(np.maximum(delta_hat, lower), upper)
-    delta_hat = delta_hat[0]
-    return {"delta": float(delta_hat), "iterations": iterations}
+    delta_estimate.delta = delta_hat
+    return delta_estimate

@@ -9,6 +9,7 @@ import numpy as np
 from typing import Optional
 import torchlambertw.distributions
 from torchlambertw.models import igmm
+from . import base
 
 
 class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
@@ -29,20 +30,31 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         self.verbose = verbose
         # estimated parameters
         self.params_ = {}
+        self.init_params = {}
         self.optim_params = {}
 
     def _initialize_params(self, data):
         _eps = 1e-4
-        delta_init = igmm.delta_taylor(data)
-        self.optim_params["mu"] = torch.tensor(data.mean(), requires_grad=True)
+
+        theta_init = base.Theta(
+            delta=igmm.delta_gmm(data).delta,
+            beta={"loc": 0.5 * (data.median() + data.mean()), "scale": data.std()},
+            gamma=0.0,
+        )
+        self.init_params = theta_init
+
+        self.optim_params["mu"] = torch.tensor(
+            theta_init.beta["loc"], requires_grad=True
+        )
         self.optim_params["log_sigma"] = torch.tensor(
-            np.log(data.std() + _eps), requires_grad=True
+            np.log(theta_init.beta["scale"] + _eps), requires_grad=True
         )
         self.optim_params["log_delta"] = torch.tensor(
-            np.log(igmm.delta_taylor(data) + _eps), requires_grad=True
+            np.log(theta_init.delta + _eps), requires_grad=True
         )
 
     def fit(self, data: np.ndarray):
+        """Trains the MLE of a Lambert W distribution based on torch likelihood optimization."""
         self._initialize_params(data)
         init_params = list(self.optim_params.values())
         optimizer = torch.optim.Adam(init_params, lr=self.lr)
@@ -67,9 +79,13 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
                 if (epoch + 1) % self.verbose == 0:
                     print(f"Epoch [{epoch+1}/{self.n_init}], Loss: {loss.item()}")
 
-        self.params_["mu"] = float(self.optim_params["mu"].detach().numpy())
-        self.params_["sigma"] = np.exp(self.optim_params["log_sigma"].detach().numpy())
-        self.params_["delta"] = np.exp(self.optim_params["log_delta"].detach().numpy())
+        self.params_ = base.Theta(
+            delta=np.exp(self.optim_params["log_delta"].detach().numpy()),
+            beta={
+                "loc": float(self.optim_params["mu"].detach().numpy()),
+                "scale": np.exp(self.optim_params["log_sigma"].detach().numpy()),
+            },
+        )
         if self.verbose:
             print("MLE: ", self.params_)
         return self
