@@ -38,12 +38,12 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
 
         theta_init = base.Theta(
             delta=igmm.delta_gmm(data).delta,
-            beta={"loc": 0.5 * (data.median() + data.mean()), "scale": data.std()},
+            beta={"loc": 0.5 * (np.median(data) + data.mean()), "scale": data.std()},
             gamma=0.0,
         )
         self.init_params = theta_init
 
-        self.optim_params["mu"] = torch.tensor(
+        self.optim_params["loc"] = torch.tensor(
             theta_init.beta["loc"], requires_grad=True
         )
         self.optim_params["log_sigma"] = torch.tensor(
@@ -64,7 +64,7 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
             optimizer.zero_grad()  # Clear gradients
             loglik = (
                 torchlambertw.distributions.LambertWNormal(
-                    self.optim_params["mu"],
+                    self.optim_params["loc"],
                     torch.exp(self.optim_params["log_sigma"]),
                     torch.exp(self.optim_params["log_delta"]),
                 )
@@ -82,16 +82,10 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         self.params_ = base.Theta(
             delta=np.exp(self.optim_params["log_delta"].detach().numpy()),
             beta={
-                "loc": float(self.optim_params["mu"].detach().numpy()),
+                "loc": float(self.optim_params["loc"].detach().numpy()),
                 "scale": np.exp(self.optim_params["log_sigma"].detach().numpy()),
             },
         )
         if self.verbose:
             print("MLE: ", self.params_)
-        return self
-
-    def transform(self, data):
-        return self
-
-    def inverse_transform(self, data):
         return self

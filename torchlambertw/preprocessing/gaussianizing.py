@@ -18,7 +18,7 @@ class Gaussianizer(sklearn.base.TransformerMixin):
         self.mle_kwargs = mle_kwargs
         self.mle_per_col: Dict[int, Any] = {}
 
-    def fit(self, data):
+    def fit(self, data: np.ndarray):
         if len(data.shape) == 1:
             data = data[:, np.newaxis]
 
@@ -27,9 +27,11 @@ class Gaussianizer(sklearn.base.TransformerMixin):
             tmp = mle.MLE(dist_name="normal", **self.mle_kwargs)
             tmp.fit(data[:, i])
             self.mle_per_col[i] = tmp
+            del tmp
         return self
 
     def transform(self, data) -> np.ndarray:
+        """Transforms data to a gaussiani version."""
         is_univariate_input = False
         if len(data.shape) == 1:
             is_univariate_input = True
@@ -39,11 +41,11 @@ class Gaussianizer(sklearn.base.TransformerMixin):
         n_cols = len(self.mle_per_col)
         for i in range(n_cols):
             tmp_trafo = transforms.LambertWTailTransform(
-                shift=torch.tensor(self.mle_per_col[i].params_["mu"]),
-                scale=torch.tensor(self.mle_per_col[i].params_["sigma"]),
-                tailweight=torch.tensor(self.mle_per_col[i].params_["delta"]),
+                shift=torch.tensor(self.mle_per_col[i].params_.beta["loc"]),
+                scale=torch.tensor(self.mle_per_col[i].params_.beta["scale"]),
+                tailweight=torch.tensor(self.mle_per_col[i].params_.delta),
             )
-            result[:, i] = tmp_trafo(data[:, i]).numpy()
+            result[:, i] = tmp_trafo(torch.tensor(data[:, i])).numpy()
         if is_univariate_input:
             result = result.ravel()
         return result
