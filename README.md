@@ -91,11 +91,14 @@ plot_lambertW(-1, 6)
 
 For the original papers see Goerg 2011 & 2015. If you want to jump into applications and examples I suggest looking at the [**LambertW** R package](https://github.com/gmgeorg/LambertW) for detailed references and links to many external examples on Stackoverflow / cross-validated and other external blogs.
 
-## Lambert W x F distributions
+### In a nutshell
 
-In a nutshell: Lambert W x F distributions are a generalized family of distributions, that take an "input" X ~ F and transform it to a skewed and/or heavy-tailed output, Y ~ Lambert W x F, via a particularly parameterized transformation. For parameter values of 0, the new variable collapses to X, which means that Lambert W x F distributions always contain the original base distribution F as a special case.  Ie it does not hurt to impose a Lambert W x F distribution on your data; worst case, parameter estimates are 0 and you get F back; best case: you properly account for skewness & heavy-tails in your data and can even remove it (by transforming data back to having X ~ F).
+Lambert W x F distributions are a generalized family of distributions, that take an "input" X ~ F and transform it to a skewed and/or heavy-tailed output, Y ~ Lambert W x F, via a particularly parameterized transformation.  See Goerg (2011, 2015) for details.
 
-The such obtained random variable / data / distribution is then a Lambert W x F distribution. 
+![Lambert W Function](imgs/input_output_system_tail.png)
+
+
+For parameter values of 0, the new variable collapses to X, which means that Lambert W x F distributions always contain the original base distribution F as a special case.  Ie it does not hurt to impose a Lambert W x F distribution on your data; worst case, parameter estimates are 0 and you get F back; best case: you properly account for skewness & heavy-tails in your data and can even remove it (by transforming data back to having X ~ F). The such obtained random variable / data / distribution is then a Lambert W x F distribution. 
 
 The convenient part about this is that when working with data y1, ..., yn, you can estimate the transformation from the data and transform it back into the (unobserved) x1, ..., xn.  This is particularly useful when X ~ Normal(loc, scale), as then you can "Gaussianize" your data.
 
@@ -182,8 +185,7 @@ plt.show()
 ### Skewed Lambert W x F distributions
 
 For examples of skewed Lambert W x F distributions, for F = Normal, Exponential, or Gamma
-see the demo notebook.
-
+see [demo notebook](notebooks/demo-lambertw-f-distributions.ipynb).
 
 ## Implementation details
 
