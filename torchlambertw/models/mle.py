@@ -19,8 +19,8 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         self,
         dist_name: str,
         distribution: Optional[torch.distributions.Distribution] = None,
-        n_init: int = 10,
-        lr: float = 0.001,
+        n_init: int = 100,
+        lr: float = 0.01,
         verbose: int = 0,
     ):
         self.distribution = distribution
@@ -32,13 +32,17 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         self.params_ = {}
         self.init_params = {}
         self.optim_params = {}
+        self.losses = []
 
     def _initialize_params(self, data):
         _eps = 1e-4
 
         theta_init = base.Theta(
-            delta=igmm.delta_gmm(data).delta,
-            beta={"loc": 0.5 * (np.median(data) + data.mean()), "scale": data.std()},
+            delta=igmm.delta_gmm(data, not_negative=True).delta,
+            beta={
+                "loc": np.median(data),
+                "scale": data.std(),  # adjust based on delta prior estimate
+            },
             gamma=0.0,
         )
         self.init_params = theta_init
@@ -57,10 +61,9 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         """Trains the MLE of a Lambert W distribution based on torch likelihood optimization."""
         self._initialize_params(data)
         init_params = list(self.optim_params.values())
-        optimizer = torch.optim.Adam(init_params, lr=self.lr)
+        optimizer = torch.optim.NAdam(init_params, lr=self.lr)
         tr_data = torch.tensor(data)
         for epoch in range(self.n_init):
-
             optimizer.zero_grad()  # Clear gradients
             loglik = (
                 torchlambertw.distributions.TailLambertWNormal(
@@ -75,6 +78,8 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
             loss = -loglik  # Negative log likelihood as the loss
             loss.backward()  # Backpropagate gradients
             optimizer.step()  # Update parameters
+            self.losses.append(loss.item())
+
             if self.verbose:
                 if (epoch + 1) % self.verbose == 0:
                     print(f"Epoch [{epoch+1}/{self.n_init}], Loss: {loss.item()}")
