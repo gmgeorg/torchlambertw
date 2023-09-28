@@ -7,9 +7,9 @@ from . import transforms
 import torch.distributions as td
 
 
-class LambertWDistribution(td.transformed_distribution.TransformedDistribution):
+class TailLambertWDistribution(td.transformed_distribution.TransformedDistribution):
     r"""
-    Creates a heavy-tail Lambert W x Normal distribution parameterized by
+    Creates a heavy-tail Lambert W x F distribution parameterized by
     `shift`, `scale`, and `tailweight` where::
 
         X ~ F(shift, scale)
@@ -80,7 +80,7 @@ class LambertWDistribution(td.transformed_distribution.TransformedDistribution):
         pass
 
 
-class LambertWNormal(td.transformed_distribution.TransformedDistribution):
+class TailLambertWNormal(td.transformed_distribution.TransformedDistribution):
     r"""
     Creates a heavy-tail Lambert W x Normal distribution parameterized by
     `loc`, `scale`, and `tailweight` where::
@@ -106,6 +106,16 @@ class LambertWNormal(td.transformed_distribution.TransformedDistribution):
     has_rsample = True
 
     def __init__(self, loc, scale, tailweight, validate_args=None):
+
+        if not isinstance(loc, torch.Tensor):
+            loc = torch.tensor(loc)
+
+        if not isinstance(scale, torch.Tensor):
+            scale = torch.tensor(scale)
+
+        if not isinstance(tailweight, torch.Tensor):
+            tailweight = torch.tensor(tailweight)
+
         self.tailweight = tailweight
         super().__init__(
             base_distribution=td.Normal(

@@ -63,7 +63,7 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
 
             optimizer.zero_grad()  # Clear gradients
             loglik = (
-                torchlambertw.distributions.LambertWNormal(
+                torchlambertw.distributions.TailLambertWNormal(
                     self.optim_params["loc"],
                     torch.exp(self.optim_params["log_sigma"]),
                     torch.exp(self.optim_params["log_delta"]),

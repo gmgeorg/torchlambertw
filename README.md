@@ -45,7 +45,7 @@ Implementation of the Lambert W function (special function) in `torch`:
 ```python
 import torchlambertw as tw
 import numpy as np
-special.lambertw(torch.tensor([-1., 0., 1., -np.exp(-1)]))
+tw.special.lambertw(torch.tensor([-1., 0., 1., -np.exp(-1)]))
 ```
 output:
 ```bash
@@ -91,13 +91,29 @@ plot_lambertW(-1, 6)
 
 For the original papers see Goerg 2011 & 2015. If you want to jump into applications and examples I suggest looking at the [**LambertW** R package](https://github.com/gmgeorg/LambertW) for detailed references and links to many external examples on Stackoverflow / cross-validated and other external blogs.
 
+## Lambert W x F distributions
 
-### Heavy-tail distributions first
+In a nutshell: Lambert W x F distributions are a generalized family of distributions, that take an "input" X ~ F and transform it to a skewed and/or heavy-tailed output, Y ~ Lambert W x F, via a particularly parameterized transformation. For parameter values of 0, the new variable collapses to X, which means that Lambert W x F distributions always contain the original base distribution F as a special case.  Ie it does not hurt to impose a Lambert W x F distribution on your data; worst case, parameter estimates are 0 and you get F back; best case: you properly account for skewness & heavy-tails in your data and can even remove it (by transforming data back to having X ~ F).
+
+The such obtained random variable / data / distribution is then a Lambert W x F distribution. 
+
+The convenient part about this is that when working with data y1, ..., yn, you can estimate the transformation from the data and transform it back into the (unobserved) x1, ..., xn.  This is particularly useful when X ~ Normal(loc, scale), as then you can "Gaussianize" your data.
+
+**Important**: The `torch.distributions` framework allows you to easily build *any* Lambert W x F
+distribution by just using the skewed & heavy tail Lambert W transform here implemented here and pass whatever `base_distribution` -- that's F -- makes sense to you. Voila! You have just built a Lambert W x F distribution.
+
+See [demo notebook](notebooks/demo-lambertw-f-distributions.ipynb) for details.
+
+
+### Heavy-tail Lambert W x F distributions 
+
+Here is an illustration of a heavy-tail Lambert W x Gaussian distribution, which takes a Gaussian input and turns it into something heavy-tailed. If `tailweight = 0` then its just a Gaussian again.
+
 ```python
 from torchlambertw import distributions as tlwd
 
 # Implements a Lambert W x Normal distribution with (loc=1, scale=3, tailweight=0.75)
-m = tlwd.LambertWNormal(loc=torch.tensor([1.0]), 
+m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]), 
                         scale=torch.tensor([3.0]), 
                         tailweight=torch.tensor([0.75]))
 m.sample((2,)) 
@@ -120,7 +136,7 @@ Let's draw a random sample from distribution and plot density / ecdfplot.
 ```python
 torch.manual_seed(0)
 # Use a less heavy-tailed distribution with a tail parameter of 0.25 (ie moments < 1/0.25 = 4 exist).
-m = tlwd.LambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]), 
+m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]), 
                         tailweight=torch.tensor([0.25]))
 y = m.sample((1000,)).numpy().ravel()
 
@@ -162,56 +178,11 @@ plt.show()
 ![Lambert W x Gaussian histogram and KDE](imgs/lambertw_gauss_latent_hist_kde.png)
 
 ![Lambert W x Gaussian qqnorm plot](imgs/lambertw_gauss_latent_qqplot.png)
+
 ### Skewed Lambert W x F distributions
 
-For introducting skewness one can use the skewed Lambert W x F distributions; particularly
-interesting are skewed Lambert W x Gaussian distributions as they can be used to transform Normal data to skewed data (and back).
-
-```python
-torch.manual_seed(0)
-m = tlwd.SkewLambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]), 
-                        skewweight=torch.tensor([0.25]))
-y = m.sample((1000,)).numpy().ravel()
-
-
-sns.displot(y, kde=True)
-plt.show()
-sm.qqplot(y, line='45', fit=True)
-plt.grid()
-plt.show()
-```
-
-![skewed Lambert W x Gaussian histogram and KDE](imgs/lambertw_skew_gauss_hist_kde.png)
-
-![skewed Lambert W x Gaussian qqnorm plot](imgs/lambertw_skew_gauss_qqplot.png)
-
-#### Skewed Lambert W x Exponential distributions
-
-Lambert W x F distribution can be generated for any arbitratry F.  Here we show an example of a skewed Lambert W x Exponential distribution. For `skewweight > 0` , this will be more (right) skewed than a baseline exponential distribution. 
-
-See Goerg (2011) and Kaarik et al. (2023).
-```python
-torch.manual_seed(0)
-m = tlwd.SkewLambertWExponential(rate=torch.tensor([3.0]), 
-                                 skewweight=torch.tensor([0.2]))
-y = m.sample((1000,)).numpy().ravel()
-print("mean: theoretical %f; empirical: %f" % (m.mean.numpy()[0], np.mean(x)))
-
-sns.displot(y, kde=True)
-plt.show()
-sm.qqplot(y, line='45', fit=True, dist=stats.expon)
-plt.grid()
-plt.show()
-
-```
-
-Mean is larger than the 1/3. rate of the baseline exponential distribution because of the longer tail.
-```
-mean: theoretical 0.520833; empirical: 0.481116
-```
-
-![skewed Lambert W x Exponential histogram and KDE](imgs/lambertw_skew_exp_hist_kde.png)
-![skewed Lambert W x Exponential qqnorm plot](imgs/lambertw_skew_exp_qqplot.png)
+For examples of skewed Lambert W x F distributions, for F = Normal, Exponential, or Gamma
+see the demo notebook.
 
 
 ## Implementation details
@@ -219,9 +190,19 @@ mean: theoretical 0.520833; empirical: 0.481116
 This implementation closely follows the TensorFlow Probability version in [`tfp.special.lambertw`](https://www.tensorflow.org/probability/api_docs/python/tfp/math/lambertw).
 
 
+## Related Implementations
+
+* TensorFlow Probability: [**LambertWDistribution**](https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/LambertWDistribution)
+
+* R package: [**LambertW**](https://github.com/gmgeorg/LambertW)
+
+* R package / C++: [**lamw**](https://github.com/aadler/lamW)
+
+
+
 See also [here](https://github.com/thibsej/unbalanced-ot-functionals/blob/13f2203b3993d973f929578085ea458c5c1a7a78/common/torch_lambertw.py) and [here](
 https://github.com/AminJun/BreakingCertifiableDefenses/blob/cc469fa48f7efba21f3584e233c4db0c9a4856c1/RandomizedSmoothing/projected_sinkhorn/lambertw.py
-)) for minimum example `pytorch` implementations.
+)) for minimum example `pytorch` implementations [not optimized for fast iteration though and good starting points.]
 
 
 ## References
