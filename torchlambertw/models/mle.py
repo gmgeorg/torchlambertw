@@ -7,6 +7,8 @@ import sklearn
 import torch
 import numpy as np
 from typing import Optional
+from torch.optim import lr_scheduler
+
 import torchlambertw.distributions
 from torchlambertw.models import igmm
 from . import base
@@ -20,7 +22,7 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         dist_name: str,
         distribution: Optional[torch.distributions.Distribution] = None,
         n_init: int = 100,
-        lr: float = 0.01,
+        lr: float = 0.05,
         verbose: int = 0,
     ):
         self.distribution = distribution
@@ -62,6 +64,7 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         self._initialize_params(data)
         init_params = list(self.optim_params.values())
         optimizer = torch.optim.NAdam(init_params, lr=self.lr)
+        scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
         tr_data = torch.tensor(data)
         for epoch in range(self.n_init):
             optimizer.zero_grad()  # Clear gradients
@@ -78,6 +81,7 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
             loss = -loglik  # Negative log likelihood as the loss
             loss.backward()  # Backpropagate gradients
             optimizer.step()  # Update parameters
+            scheduler.step()
             self.losses.append(loss.item())
 
             if self.verbose:

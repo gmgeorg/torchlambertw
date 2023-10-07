@@ -5,7 +5,7 @@ import torch
 
 from typing import Dict, Any, Optional
 from torchlambertw.models import mle
-import torchlambertw.models.w_transforms
+from ..preprocessing import np_transforms
 from torchlambertw import transforms
 
 

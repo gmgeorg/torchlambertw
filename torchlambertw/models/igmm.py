@@ -7,7 +7,7 @@ import scipy.stats
 import numpy as np
 import warnings
 
-from . import w_transforms
+from ..preprocessing import np_transforms
 from . import base
 import scipy.optimize
 
@@ -65,7 +65,7 @@ def delta_gmm(
         if not_negative:
             # convert delta to > 0
             delta = np.exp(delta)
-        u_g = w_transforms.W_delta(z, delta=delta)
+        u_g = np_transforms.W_delta(z, delta=delta)
         if np.any(np.isinf(u_g)):
             return kurtosis_x ** 2
 

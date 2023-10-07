@@ -34,3 +34,7 @@ def W_delta(z: np.ndarray, delta: np.ndarray) -> np.ndarray:
         z,
         np.real(np.sqrt(scipy.special.lambertw(delta_z2, k=0)) / delta) * np.sign(z),
     )
+
+
+def W_tau(y: np.ndarray, tau: np.ndarray) -> np.ndarray:
+    """Compute 
