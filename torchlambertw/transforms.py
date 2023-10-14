@@ -24,7 +24,11 @@ def H_gamma(u: torch.tensor, gamma: torch.tensor) -> torch.tensor:
 
 def W_gamma(z: torch.tensor, gamma: torch.tensor, k: int) -> torch.tensor:
     """Computes W_gamma(z), the inverse of H_gamma(u)."""
-    return special.lambertw(gamma * z, k=k) / gamma
+    return torch.where(
+        torch.abs(torch.tensor(gamma)) < _EPS,
+        z,
+        special.lambertw(gamma * z, k=k) / gamma,
+    )
 
 
 def G_delta(u: torch.tensor, delta: torch.tensor) -> torch.tensor:
