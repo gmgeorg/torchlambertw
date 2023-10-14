@@ -47,13 +47,6 @@ class Gaussianizer(sklearn.base.TransformerMixin):
         result = np.zeros_like(data)
         n_cols = len(self.mle_per_col)
         for i in range(n_cols):
-            tmp_trafo = transforms.LambertWTailTransform(
-                shift=torch.tensor(self.mle_per_col[i].params_.beta["loc"]),
-                scale=torch.tensor(self.mle_per_col[i].params_.beta["scale"]),
-                tailweight=torch.tensor(
-                    self.mle_per_col[i].params_.lambertw_params.delta
-                ),
-            )
             result[:, i] = np_transforms.normalize_by_tau(
                 y=data[:, i],
                 tau=base.Tau(
@@ -62,7 +55,6 @@ class Gaussianizer(sklearn.base.TransformerMixin):
                     lambertw_params=self.mle_per_col[i].params_.lambertw_params,
                 ),
             )
-            # result[:, i] = tmp_trafo(torch.tensor(data[:, i])).numpy()
         if is_univariate_input:
             result = result.ravel()
         return result
