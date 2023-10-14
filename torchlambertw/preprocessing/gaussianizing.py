@@ -54,7 +54,15 @@ class Gaussianizer(sklearn.base.TransformerMixin):
                     self.mle_per_col[i].params_.lambertw_params.delta
                 ),
             )
-            result[:, i] = tmp_trafo(torch.tensor(data[:, i])).numpy()
+            result[:, i] = np_transforms.W_tau(
+                y=data[:, i],
+                tau=base.Tau(
+                    loc=self.mle_per_col[i].params_.beta["loc"],
+                    scale=self.mle_per_col[i].params_.beta["scale"],
+                    lambertw_params=self.mle_per_col[i].params_.lambertw_params,
+                ),
+            )
+            # result[:, i] = tmp_trafo(torch.tensor(data[:, i])).numpy()
         if is_univariate_input:
             result = result.ravel()
         return result

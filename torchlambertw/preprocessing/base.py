@@ -28,18 +28,16 @@ def _is_eq_value(x: _FLOAT_OR_ARRAY, value: float) -> bool:
     return l1_norm < _EPS
 
 
-def _to_two_dim_array(x: _FLOAT_OR_ARRAY) -> np.ndarray:
+def _to_one_dim_array(x: _FLOAT_OR_ARRAY) -> np.ndarray:
     if isinstance(x, float):
-        return np.array([[x]])
+        return np.array([x])
     if isinstance(x, np.ndarray):
         if len(x.shape) == 0:
-            return np.array([[x]])
+            return np.array([x])
         if len(x.shape) == 1:
-            return x[:, np.newaxis]
-        if len(x.shape) == 2:
             return x
 
-    raise ValueError("Could not convert successfully to 2-dim array.")
+    raise ValueError("Could not convert successfully to 1-dim array.")
 
 
 def _check_params(
@@ -54,8 +52,7 @@ def _check_params(
         assert _is_eq_value(gamma, 0.0)
 
     assert np.all(alpha > 0.0)
-
-    assert 1 <= delta.shape[1] <= 2
+    assert len(delta.shape) == 1
 
 
 @dataclasses.dataclass
@@ -67,9 +64,9 @@ class LambertWParams:
     alpha: np.ndarray = 1.0
 
     def __post_init__(self):
-        self.gamma = _to_two_dim_array(self.gamma)
-        self.delta = _to_two_dim_array(self.delta)
-        self.alpha = _to_two_dim_array(self.alpha)
+        self.gamma = _to_one_dim_array(self.gamma)
+        self.delta = _to_one_dim_array(self.delta)
+        self.alpha = _to_one_dim_array(self.alpha)
         _check_params(self.gamma, self.delta, self.alpha)
 
     @property
@@ -77,10 +74,10 @@ class LambertWParams:
         if not _is_eq_value(self.gamma, 0.0):
             return LambertWType.S
 
-        if self.delta.shape[1] == 1:
+        if len(self.delta) == 1:
             return LambertWType.H
 
-        if self.delta.shape[1] == 2:
+        if len(self.delta) == 2:
             return LambertWType.HH
 
         raise ValueError(
