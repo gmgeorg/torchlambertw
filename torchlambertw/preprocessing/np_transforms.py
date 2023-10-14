@@ -38,7 +38,7 @@ def W_delta(z: np.ndarray, delta: np.ndarray) -> np.ndarray:
     return np.where(
         np.abs(delta_z2) < _EPS,
         z,
-        np.real(np.sqrt(scipy.special.lambertw(delta_z2, k=0)) / delta) * np.sign(z),
+        np.sqrt(np.real(scipy.special.lambertw(delta_z2, k=0)) / delta) * np.sign(z),
     )
 
 
