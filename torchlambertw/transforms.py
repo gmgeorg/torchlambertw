@@ -84,15 +84,17 @@ class LambertWTailTransform(td.transforms.Transform):
         return (input - self.shift) / self.scale
 
     def _inverse_normalize(self, output):
-        return (output * self.scale) + self.shift
+        return output * self.scale + self.shift
 
     def _call(self, x):
         u = self._normalize(x)
-        return self._inverse_normalize(G_delta(u, delta=self.tailweight))
+        z = G_delta(u, delta=self.tailweight)
+        return self._inverse_normalize(z)
 
     def _inverse(self, y):
         z = self._normalize(y)
-        return self._inverse_normalize(W_delta(z, delta=self.tailweight))
+        u = W_delta(z, delta=self.tailweight)
+        return self._inverse_normalize(u)
 
     def log_abs_det_jacobian(self, x, y):
         u_sq = self._normalize(x).pow(2.0)
@@ -130,18 +132,24 @@ class LambertWSkewTransform(td.transforms.Transform):
         return (input - self.shift) / self.scale
 
     def _inverse_normalize(self, output):
-        return (output * self.scale) + self.shift
+        return output * self.scale + self.shift
 
     def _call(self, x):
         u = self._normalize(x)
-        return self._inverse_normalize(H_gamma(u, gamma=self.skewweight))
+        z = H_gamma(u, gamma=self.skewweight)
+        return self._inverse_normalize(z)
 
     def _inverse(self, y):
         # Needs to use principal branch for inverse transformation; it's
         # not entirely bijective but very low probability event of non-bijectivity
         # for small gamma (approaches -> 0 for gamma -> 0).
+        # TODO: implement with non-principal branch probability as well [needs to be
+        # implemented as standalone distribution, not relying on TransformedDistribution
+        # as not bijective when accounting for non-prinipal branch. See R package LambertW
+        # for details on implementing this exactly]
         z = self._normalize(y)
-        return self._inverse_normalize(W_gamma(z, gamma=self.skewweight, k=0))
+        u = W_gamma(z, gamma=self.skewweight, k=0)
+        return self._inverse_normalize(u)
 
     def log_abs_det_jacobian(self, x, y):
         u = self._normalize(x)

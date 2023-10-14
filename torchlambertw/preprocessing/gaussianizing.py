@@ -54,7 +54,7 @@ class Gaussianizer(sklearn.base.TransformerMixin):
                     self.mle_per_col[i].params_.lambertw_params.delta
                 ),
             )
-            result[:, i] = np_transforms.W_tau(
+            result[:, i] = np_transforms.normalize_by_tau(
                 y=data[:, i],
                 tau=base.Tau(
                     loc=self.mle_per_col[i].params_.beta["loc"],

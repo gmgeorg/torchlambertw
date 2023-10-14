@@ -62,8 +62,8 @@ def test_identity_transform(loc, scale, delta, eps):
         tailweight=torch.tensor(delta),
     )
 
-    torch_result = torch_trafo(torch.tensor(x)).numpy()
-    np_result = np_transforms.W_tau(
+    torch_result = torch_trafo._inverse(torch.tensor(x)).numpy()
+    np_result = np_transforms.normalize_by_tau(
         y=x,
         tau=base.Tau(
             loc=loc,
@@ -86,10 +86,10 @@ def test_np_torch_transform_equality(loc, scale, delta):
         scale=torch.tensor(scale),
         tailweight=torch.tensor(delta),
     )
-
-    torch_result = torch_trafo(torch.tensor(x)).numpy()
-    np_result = np_transforms.W_tau(
-        y=x,
+    y = torch_trafo(torch.tensor(x))
+    torch_result = torch_trafo._inverse(y).numpy()
+    np_result = np_transforms.normalize_by_tau(
+        y=y.numpy(),
         tau=base.Tau(
             loc=loc,
             scale=scale,

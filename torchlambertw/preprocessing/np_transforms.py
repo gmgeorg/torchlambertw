@@ -42,7 +42,7 @@ def W_delta(z: np.ndarray, delta: np.ndarray) -> np.ndarray:
     )
 
 
-def W_tau(y: np.ndarray, tau: base.Tau) -> np.ndarray:
+def normalize_by_tau(y: np.ndarray, tau: base.Tau) -> np.ndarray:
     """Computes the backtransform for an observed skewed, heavy-tailed dataset."""
     z = (y - tau.loc) / tau.scale
     lambertw_type = tau.lambertw_params.lambertw_type
