@@ -3,17 +3,24 @@ import sklearn
 import numpy as np
 import torch
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 from torchlambertw.models import mle
 from ..preprocessing import np_transforms
+from ..preprocessing import base
 from torchlambertw import transforms
 
 
 class Gaussianizer(sklearn.base.TransformerMixin):
     """Module for column-wise Gaussianization using Lambert W x Normal transforms."""
 
-    def __init__(self, type: str, mle_kwargs: Optional[dict] = None):
-        self.type = type
+    def __init__(
+        self,
+        lambertw_type: Union[str, base.LambertWType],
+        mle_kwargs: Optional[dict] = None,
+    ):
+        if isinstance(lambertw_type, str):
+            lambertw_type = base.LambertWType(lambertw_type)
+        self.lambertw_type = lambertw_type
         self.lambertw_result = None
         self.mle_kwargs = mle_kwargs
         self.mle_per_col: Dict[int, Any] = {}
@@ -43,7 +50,9 @@ class Gaussianizer(sklearn.base.TransformerMixin):
             tmp_trafo = transforms.LambertWTailTransform(
                 shift=torch.tensor(self.mle_per_col[i].params_.beta["loc"]),
                 scale=torch.tensor(self.mle_per_col[i].params_.beta["scale"]),
-                tailweight=torch.tensor(self.mle_per_col[i].params_.delta),
+                tailweight=torch.tensor(
+                    self.mle_per_col[i].params_.lambertw_params.delta
+                ),
             )
             result[:, i] = tmp_trafo(torch.tensor(data[:, i])).numpy()
         if is_univariate_input:
