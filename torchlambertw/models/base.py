@@ -20,16 +20,6 @@ class DeltaEstimate:
 
 
 @dataclasses.dataclass
-class Theta:
-    """Class for keeping Lambert W x F parameters."""
-
-    beta: Dict
-    gamma: float = 0.0
-    delta: float = 0.0
-    alpha: float = 1.0
-
-
-@dataclasses.dataclass
 class LambertWEstimate:
     """Class for keeping Lambert W x F parameters."""
 

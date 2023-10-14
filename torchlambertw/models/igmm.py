@@ -10,11 +10,7 @@ import warnings
 from ..preprocessing import np_transforms
 from . import base
 import scipy.optimize
-
-
-def kurtosis(x):
-    """Computes kurtosis of data.  For normal distribution this will be 3 (ie not excess kurtosis)."""
-    return scipy.stats.kurtosis(x) + 3
+from . import moments
 
 
 def delta_taylor(
@@ -22,7 +18,7 @@ def delta_taylor(
 ):
     """Computes the taylor approximation of the 'delta' parameter given univariate data."""
     if kurtosis_y is None:
-        kurtosis_y = kurtosis(y)
+        kurtosis_y = moments.kurtosis(y)
 
     if not isinstance(kurtosis_y, (int, float)) or kurtosis_y <= 0:
         raise ValueError("kurtosis_y must be a positive numeric value")
@@ -69,7 +65,7 @@ def delta_gmm(
         if np.any(np.isinf(u_g)):
             return kurtosis_x ** 2
 
-        empirical_kurtosis = kurtosis(u_g)
+        empirical_kurtosis = moments.kurtosis(u_g)
         # for delta -> Inf, u.g can become (numerically) a constant vector
         # thus kurtosis(u.g) = NA.  In this case set empirical.kurtosis
         # to a very large value and continue.
@@ -88,7 +84,7 @@ def delta_gmm(
     if not_negative:
         delta_init = np.log(delta_init + 0.001)
 
-    delta_estimate: base.DeltaEstimate = None
+    delta_estimate: base.Delta = None
     if not_negative:
         res = scipy.optimize.minimize(
             _obj_fct, delta_init, method="BFGS", tol=tol, options={"disp": False}

@@ -11,7 +11,7 @@ from torch.optim import lr_scheduler
 
 import torchlambertw.distributions
 from torchlambertw.models import igmm
-from . import base
+from torchlambertw.preprocessing import base
 
 
 class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
@@ -22,7 +22,7 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         dist_name: str,
         distribution: Optional[torch.distributions.Distribution] = None,
         n_init: int = 100,
-        lr: float = 0.05,
+        lr: float = 0.01,
         verbose: int = 0,
     ):
         self.distribution = distribution
@@ -39,13 +39,15 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
     def _initialize_params(self, data):
         _eps = 1e-4
 
-        theta_init = base.Theta(
+        lambertw_params_init = base.LambertWParams(
             delta=igmm.delta_gmm(data, not_negative=True).delta,
+        )
+        theta_init = base.Theta(
             beta={
                 "loc": np.median(data),
                 "scale": data.std(),  # adjust based on delta prior estimate
             },
-            gamma=0.0,
+            lambertw_params=lambertw_params_init,
         )
         self.init_params = theta_init
 
@@ -56,7 +58,7 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
             np.log(theta_init.beta["scale"] + _eps), requires_grad=True
         )
         self.optim_params["log_delta"] = torch.tensor(
-            np.log(theta_init.delta + _eps), requires_grad=True
+            np.log(theta_init.lambertw_params.delta + _eps), requires_grad=True
         )
 
     def fit(self, data: np.ndarray):
@@ -89,7 +91,9 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
                     print(f"Epoch [{epoch+1}/{self.n_init}], Loss: {loss.item()}")
 
         self.params_ = base.Theta(
-            delta=np.exp(self.optim_params["log_delta"].detach().numpy()),
+            lambertw_params=base.LambertWParams(
+                delta=np.exp(self.optim_params["log_delta"].detach().numpy())
+            ),
             beta={
                 "loc": float(self.optim_params["loc"].detach().numpy()),
                 "scale": np.exp(self.optim_params["log_sigma"].detach().numpy()),
