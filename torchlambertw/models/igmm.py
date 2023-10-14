@@ -71,14 +71,14 @@ def delta_gmm(
         # to a very large value and continue.
         if np.isnan(empirical_kurtosis):
             empirical_kurtosis = 1e6
-            warnings.warning(
-                "Kurtosis estimate was NA. ",
-                "Set to large value (",
-                empirical_kurtosis,
-                ") for optimization to continue.\n",
-                "Please double-check results (in particular the 'delta' ",
-                "estimate).",
-            )
+
+            error_msg = f"""
+            Kurtosis estimate was NA. Setting to large value ({empirical_kurtosis})
+            for optimization to continue.\n Double-check results (in particular the 'delta'
+            estimate)        
+            """
+
+            warnings.warn(error_msg)
         return (empirical_kurtosis - kurtosis_x) ** 2
 
     if not_negative:
@@ -91,7 +91,7 @@ def delta_gmm(
         )
         delta_estimate = base.DeltaEstimate(
             delta=res.x[0],
-            iterations=res.nit,
+            n_iterations=res.nit,
             method="taylor",
             converged=res.success,
             optimizer_result=res,
@@ -102,7 +102,7 @@ def delta_gmm(
         )
         delta_estimate = base.DeltaEstimate(
             delta=res.x,
-            iterations=res.nfev,
+            n_iterations=res.nfev,
             method="taylor",
             converged=res.success,
             optimizer_result=res,

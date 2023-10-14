@@ -14,7 +14,7 @@ class DeltaEstimate:
 
     delta: float
     method: str
-    iterations: int
+    n_iterations: int
     converged: bool
     optimizer_result: Any
 

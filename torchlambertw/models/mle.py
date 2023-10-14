@@ -12,6 +12,7 @@ from torch.optim import lr_scheduler
 import torchlambertw.distributions
 from torchlambertw.models import igmm
 from torchlambertw.preprocessing import base
+from ..preprocessing import np_transforms
 
 
 class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
@@ -42,10 +43,13 @@ class MLE(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         lambertw_params_init = base.LambertWParams(
             delta=igmm.delta_gmm(data, not_negative=True).delta,
         )
+        loc_est = np.median(data)
+        u_init = np_transforms.W_delta(data - loc_est, delta=lambertw_params_init.delta)
+
         theta_init = base.Theta(
             beta={
-                "loc": np.median(data),
-                "scale": data.std(),  # adjust based on delta prior estimate
+                "loc": np.mean(u_init),
+                "scale": u_init.std(),  # adjust based on delta prior estimate
             },
             lambertw_params=lambertw_params_init,
         )

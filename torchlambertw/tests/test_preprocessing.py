@@ -97,3 +97,19 @@ def test_np_torch_transform_equality(loc, scale, delta):
         ),
     )
     np.testing.assert_allclose(np_result, torch_result)
+
+
+@pytest.mark.parametrize(
+    "loc,scale,delta",
+    [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)],
+)
+def test_np_transform_inverse_equality(loc, scale, delta):
+    x = _test_data()
+    tau_tmp = tau = base.Tau(
+        loc=loc,
+        scale=scale,
+        lambertw_params=base.LambertWParams(delta=delta),
+    )
+    y = np_transforms.inverse_normalize_by_tau(x, tau_tmp)
+    y_reverse = np_transforms.normalize_by_tau(y, tau_tmp)
+    np.testing.assert_allclose(x, y_reverse)

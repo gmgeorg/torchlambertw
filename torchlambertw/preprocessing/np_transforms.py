@@ -55,3 +55,18 @@ def normalize_by_tau(y: np.ndarray, tau: base.Tau) -> np.ndarray:
 
     x = u * tau.scale + tau.loc
     return x
+
+
+def inverse_normalize_by_tau(x: np.ndarray, tau: base.Tau) -> np.ndarray:
+    """Computes the backtransform for an observed skewed, heavy-tailed dataset."""
+    u = (x - tau.loc) / tau.scale
+    lambertw_type = tau.lambertw_params.lambertw_type
+    if lambertw_type == base.LambertWType.S:
+        z = H_gamma(u, gamma=tau.lambertw_params.gamma)
+    elif lambertw_type == base.LambertWType.H:
+        z = G_delta(u, delta=tau.lambertw_params.delta)
+    elif lambertw_type == base.LambertWType.HH:
+        raise NotImplementedError(f"lambertw_type={lambertw_type} not implemented yet.")
+
+    y = z * tau.scale + tau.loc
+    return y

@@ -44,7 +44,7 @@ def test_w_delta(delta):
     "loc,scale,delta",
     [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)],
 )
-def test_np_torch_transform_equality(loc, scale, delta):
+def test_torch_transform_inverse_equality(loc, scale, delta):
     x = _test_data()
     torch_trafo = transforms.LambertWTailTransform(
         shift=torch.tensor(loc),
