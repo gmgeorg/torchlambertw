@@ -84,6 +84,9 @@ class LambertWParams:
             "Lambert W Parameters gamma, delta, alpha do not uniquely identify the type."
         )
 
+    def to_numpy(self):
+        return np.concatenate([self.gamma, self.delta, self.alpha])
+
 
 @dataclasses.dataclass
 class Theta:
@@ -106,3 +109,10 @@ class Tau:
     loc: np.ndarray
     scale: np.ndarray
     lambertw_params: LambertWParams
+
+    def __post_init__(self):
+        self.loc = _to_one_dim_array(self.loc)
+        self.scale = _to_one_dim_array(self.scale)
+
+    def to_numpy(self):
+        return np.concatenate([self.loc, self.scale, self.lambertw_params.to_numpy()])

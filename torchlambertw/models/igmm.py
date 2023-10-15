@@ -19,11 +19,17 @@ def delta_taylor(
     y: np.ndarray, kurtosis_y: Optional[float] = None, dist_name: str = "normal"
 ):
     """Computes the taylor approximation of the 'delta' parameter given univariate data."""
+    y = y.ravel()
     if kurtosis_y is None:
         kurtosis_y = moments.kurtosis(y)
 
-    if not isinstance(kurtosis_y, (int, float)) or kurtosis_y <= 0:
-        raise ValueError("kurtosis_y must be a positive numeric value")
+    if not isinstance(kurtosis_y, (int, float)):
+        raise ValueError(f"kurtosis_y must be an int/float. Got {type(kurtosis_y)}.")
+
+    if kurtosis_y <= 0.0:
+        raise ValueError(
+            f"kurtosis_y must be a positive numeric value. Got {kurtosis_y}"
+        )
 
     if dist_name == "normal":
         if 66 * kurtosis_y - 162 > 0:
@@ -48,7 +54,7 @@ def delta_gmm(
     tol: float = np.finfo(float).eps ** 0.25,
     not_negative: bool = False,
     lower: float = -1.0,
-    upper: float = 3.0,
+    upper: float = 5.0,
 ):
     """Computes an estimate of delta (tail parameter) per Taylor approximation of the kurtosis."""
     assert isinstance(kurtosis_x, (int, float))
@@ -158,9 +164,10 @@ class IGMM(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
         self.params_ = {}
         self.init_params = {}
 
-    def _initialize_params(self, data):
+    def _initialize_params(self, data: np.ndarray):
+        """Initializes parameters."""
         lambertw_params_init = p_base.LambertWParams(
-            delta=delta_gmm(data, not_negative=True).delta,
+            delta=delta_gmm(data, not_negative=self.not_negative).delta,
         )
         loc_est = np.median(data)
         u_init = np_transforms.W_delta(data - loc_est, delta=lambertw_params_init.delta)
@@ -175,6 +182,12 @@ class IGMM(sklearn.base.BaseEstimator, sklearn.base.TransformerMixin):
 
     def fit(self, data: np.ndarray):
         """Trains the IGMM of a Lambert W x F distribution based on methods of moments."""
+        if len(data.shape) == 1:
+            data = data[:, np.newaxis]
+        if data.shape[1] > 1:
+            raise NotImplementedError(
+                "IGMM is only implemented for univariate data. Use Gaussianizer() instead for > 1 columns."
+            )
         self._initialize_params(data)
 
         tau_trace = np.zeros(shape=(self.max_iter + 1, 3))
