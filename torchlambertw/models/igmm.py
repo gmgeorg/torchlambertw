@@ -12,7 +12,7 @@ import scipy.optimize
 from ..preprocessing import np_transforms
 from ..preprocessing import base as p_base
 from . import base
-from . import moments
+from ..utils import moments
 
 
 def delta_taylor(

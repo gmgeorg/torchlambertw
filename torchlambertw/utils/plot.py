@@ -1,4 +1,4 @@
-"""Misc utility functions."""
+"""Misc plotting functions."""
 
 
 import matplotlib.pyplot as plt
