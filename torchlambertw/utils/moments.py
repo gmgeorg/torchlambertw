@@ -10,4 +10,4 @@ def kurtosis(x):
 
 def skewness(x):
     """Computes skewness of data.  For normal distribution this will be 0."""
-    return scipy.stats.skewness(x)
+    return scipy.stats.skew(x)
