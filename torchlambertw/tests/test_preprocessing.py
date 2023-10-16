@@ -6,9 +6,6 @@ import scipy.special
 import pytest
 import timeit
 
-
-from ..preprocessing import np_transforms
-from ..preprocessing import base
 from torchlambertw import transforms
 
 
@@ -16,28 +13,6 @@ def _test_data():
     rng = np.random.RandomState(seed=42)
     x = rng.normal(size=10)
     return x
-
-
-@pytest.mark.parametrize(
-    "gamma",
-    [(-0.1), (0.0), (0.1), (0.2)],
-)
-def test_w_gamma(gamma):
-    u = _test_data()
-    u_gamma = np_transforms.H_gamma(u, gamma=gamma)
-    w_u_gamma = np_transforms.W_gamma(u_gamma, gamma=gamma, k=0)
-    np.testing.assert_allclose(u, w_u_gamma)
-
-
-@pytest.mark.parametrize(
-    "delta",
-    [(-0.1), (0.0), (0.1), (0.2)],
-)
-def test_w_delta(delta):
-    u = _test_data()
-    u_delta = np_transforms.G_delta(u, delta=delta)
-    w_u_delta = np_transforms.W_delta(u_delta, delta=delta)
-    np.testing.assert_allclose(u, w_u_delta)
 
 
 @pytest.mark.parametrize(
@@ -63,40 +38,7 @@ def test_identity_transform(loc, scale, delta, eps):
     )
 
     torch_result = torch_trafo._inverse(torch.tensor(x)).numpy()
-    np_result = np_transforms.normalize_by_tau(
-        y=x,
-        tau=base.Tau(
-            loc=loc,
-            scale=scale,
-            lambertw_params=base.LambertWParams(delta=delta),
-        ),
-    )
-    np.testing.assert_allclose(np_result, x, atol=eps)
     np.testing.assert_allclose(torch_result, x, atol=eps)
-
-
-@pytest.mark.parametrize(
-    "loc,scale,delta",
-    [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)],
-)
-def test_np_torch_transform_equality(loc, scale, delta):
-    x = _test_data()
-    torch_trafo = transforms.LambertWTailTransform(
-        shift=torch.tensor(loc),
-        scale=torch.tensor(scale),
-        tailweight=torch.tensor(delta),
-    )
-    y = torch_trafo(torch.tensor(x))
-    torch_result = torch_trafo._inverse(y).numpy()
-    np_result = np_transforms.normalize_by_tau(
-        y=y.numpy(),
-        tau=base.Tau(
-            loc=loc,
-            scale=scale,
-            lambertw_params=base.LambertWParams(delta=delta),
-        ),
-    )
-    np.testing.assert_allclose(np_result, torch_result)
 
 
 @pytest.mark.parametrize(
@@ -105,11 +47,12 @@ def test_np_torch_transform_equality(loc, scale, delta):
 )
 def test_np_transform_inverse_equality(loc, scale, delta):
     x = _test_data()
-    tau_tmp = tau = base.Tau(
-        loc=loc,
-        scale=scale,
-        lambertw_params=base.LambertWParams(delta=delta),
+    torch_trafo = transforms.LambertWTailTransform(
+        shift=torch.tensor(loc),
+        scale=torch.tensor(scale),
+        tailweight=torch.tensor(delta),
     )
-    y = np_transforms.inverse_normalize_by_tau(x, tau_tmp)
-    y_reverse = np_transforms.normalize_by_tau(y, tau_tmp)
-    np.testing.assert_allclose(x, y_reverse)
+    y = torch_trafo._inverse(torch.tensor(x))
+
+    y_reverse = torch_trafo(y)
+    np.testing.assert_allclose(x, y_reverse.numpy().ravel())
