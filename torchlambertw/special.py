@@ -13,7 +13,7 @@ from typing import Tuple, Optional
 import torch
 import numpy as np
 
-_EPS = torch.finfo(torch.float32).eps
+_EPS = torch.finfo(torch.float64).eps
 # Constant for - 1 / e.  This is the lowest 'z' for which principal / non-principal W
 # is real valued (W(-1/e) = -1).  For any z < -1 / exp(1), W(z) = NA.
 _EXP_INV = np.exp(-1)
