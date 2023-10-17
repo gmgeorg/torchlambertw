@@ -181,6 +181,7 @@ def lambertw(z: torch.Tensor, k: int = 0) -> torch.Tensor:
         W(z), a tensor of same shape and float dtype as input; with W_{k}(z) values.
         Potentially contains NA and +/- Inf values.
     """
+    z = z.to(torch.float)
     if np.abs(k) < _EPS:
         return _lambertw_principal_branch(z)
     elif np.abs(k + 1) < _EPS:
