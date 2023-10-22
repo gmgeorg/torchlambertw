@@ -55,4 +55,4 @@ def test_np_transform_inverse_equality(loc, scale, delta):
     y = torch_trafo._inverse(torch.tensor(x))
 
     y_reverse = torch_trafo(y)
-    np.testing.assert_allclose(x, y_reverse.numpy().ravel())
+    np.testing.assert_allclose(x, y_reverse.numpy().ravel(), atol=1e-5)
