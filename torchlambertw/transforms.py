@@ -56,7 +56,7 @@ def W_delta(z: torch.tensor, delta: torch.tensor) -> torch.tensor:
 # Distribution transforms
 
 
-class LambertWTailTransform(td.transforms.Transform):
+class TailLambertWTransform(td.transforms.Transform):
     r"""
     Transform via the mapping :math:`y = x * \exp(delta / 2 * x**2)`.
     """
@@ -104,7 +104,7 @@ class LambertWTailTransform(td.transforms.Transform):
         )
 
 
-class LambertWSkewTransform(td.transforms.Transform):
+class SkewLambertWTransform(td.transforms.Transform):
     r"""
     Transform via the mapping :math:`y = x * \exp(gamma * x)`.
     """

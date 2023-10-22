@@ -31,7 +31,7 @@ def _test_data():
 )
 def test_identity_transform(loc, scale, delta, eps):
     x = _test_data()
-    torch_trafo = transforms.LambertWTailTransform(
+    torch_trafo = transforms.TailLambertWTransform(
         shift=torch.tensor(loc),
         scale=torch.tensor(scale),
         tailweight=torch.tensor(delta),
@@ -47,7 +47,7 @@ def test_identity_transform(loc, scale, delta, eps):
 )
 def test_np_transform_inverse_equality(loc, scale, delta):
     x = _test_data()
-    torch_trafo = transforms.LambertWTailTransform(
+    torch_trafo = transforms.TailLambertWTransform(
         shift=torch.tensor(loc),
         scale=torch.tensor(scale),
         tailweight=torch.tensor(delta),

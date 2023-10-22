@@ -46,7 +46,7 @@ def test_w_delta(delta):
 )
 def test_torch_transform_inverse_equality(loc, scale, delta):
     x = _test_data()
-    torch_trafo = transforms.LambertWTailTransform(
+    torch_trafo = transforms.TailLambertWTransform(
         shift=torch.tensor(loc),
         scale=torch.tensor(scale),
         tailweight=torch.tensor(delta),

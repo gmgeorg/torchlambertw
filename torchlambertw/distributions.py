@@ -53,17 +53,18 @@ class TailLambertWDistribution(td.transformed_distribution.TransformedDistributi
         shift: _PARAM_DTYPE,
         scale: _PARAM_DTYPE,
         tailweight: _PARAM_DTYPE,
+        use_mean_variance: bool = True,
         validate_args=None,
     ):
+        """Initialize the distribution."""
         self.shift = _to_tensor(shift)
         self.tailweight = _to_tensor(tailweight)
         scale = _to_tensor(scale)
 
+        base_distr = base_distribution(**base_dist_args, validate_args=validate_args)
         super().__init__(
-            base_distribution=base_distribution(
-                **base_dist_args, validate_args=validate_args
-            ),
-            transforms=transforms.LambertWTailTransform(
+            base_distribution=base_distr,
+            transforms=transforms.TailLambertWTransform(
                 shift=shift, scale=scale, tailweight=tailweight
             ),
             validate_args=validate_args,
@@ -136,7 +137,7 @@ class TailLambertWNormal(td.transformed_distribution.TransformedDistribution):
             base_distribution=td.Normal(
                 loc=loc, scale=scale, validate_args=validate_args
             ),
-            transforms=transforms.LambertWTailTransform(
+            transforms=transforms.TailLambertWTransform(
                 shift=loc, scale=scale, tailweight=tailweight
             ),
             validate_args=validate_args,
@@ -206,17 +207,18 @@ class SkewLambertWDistribution(td.transformed_distribution.TransformedDistributi
         shift: _PARAM_DTYPE,
         scale: _PARAM_DTYPE,
         skewweight: _PARAM_DTYPE,
+        use_mean_variance: bool = True,
         validate_args=None,
     ):
         self.skewweight = _to_tensor(skewweight)
         self.shift = _to_tensor(shift)
         # Not self.scale since a .scale is a propery of Distribution object.
         scale = _to_tensor(scale)
+        base_distr = base_distribution(**base_dist_args, validate_args=validate_args)
+
         super().__init__(
-            base_distribution=base_distribution(
-                **base_dist_args, validate_args=validate_args
-            ),
-            transforms=transforms.LambertWSkewTransform(
+            base_distribution=base_distr,
+            transforms=transforms.SkewLambertWTransform(
                 shift=shift, scale=scale, skewweight=skewweight
             ),
             validate_args=validate_args,
@@ -284,7 +286,7 @@ class SkewLambertWNormal(td.transformed_distribution.TransformedDistribution):
             base_distribution=td.Normal(
                 loc=loc, scale=scale, validate_args=validate_args
             ),
-            transforms=transforms.LambertWSkewTransform(
+            transforms=transforms.SkewLambertWTransform(
                 shift=loc, scale=scale, skewweight=skewweight
             ),
             validate_args=validate_args,
@@ -359,7 +361,7 @@ class SkewLambertWExponential(td.transformed_distribution.TransformedDistributio
         self.rate = rate
         super().__init__(
             base_distribution=td.Exponential(rate=rate, validate_args=validate_args),
-            transforms=transforms.LambertWSkewTransform(
+            transforms=transforms.SkewLambertWTransform(
                 shift=0.0, scale=1.0 / rate, skewweight=skewweight
             ),
             validate_args=validate_args,
