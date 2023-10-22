@@ -21,20 +21,20 @@ def test_is_location_family(dist_name, expected):
 
 
 @pytest.mark.parametrize(
-    "dist_name,shift,scale,use_mean_variance,expected",
+    "dist_name,base_dist_args,shift,scale,use_mean_variance,expected",
     [
-        ("Normal", 0.1, 1.0, True, (0.1, 1.0)),
-        ("Normal", 0.1, 1.0, False, (0.1, 1.0)),
-        ("Normal", 0.1, 1.0, True, (0.1, 1.0)),
-        ("Normal", 0.1, 1.0, True, (0.1, 1.0)),
-        ("Normal", 0.1, 1.0, True, (0.1, 1.0)),
-        ("Normal", 0.1, 1.0, True, (0.1, 1.0)),
+        ("Normal", {"loc": 0.1, "scale": 1.0}, 0.1, 1.0, True, (0.1, 1.0)),
+        ("Normal", {"loc": 0.1, "scale": 1.0}, 0.1, 1.0, False, (0.1, 1.0)),
+        ("Normal", {"loc": 0.1, "scale": 1.0}, None, None, True, (0.1, 1.0)),
+        ("Exponential", {"rate": 2.0}, -20.0, 10.0, True, (-20.0, 10.0)),
+        ("Exponential", {"rate": 2.0}, None, None, True, (0.0, 1.0 / 2.0)),
     ],
 )
-def test_update_shift_scale(dist_name, shift, scale, use_mean_variance, expected):
+def test_update_shift_scale(
+    dist_name, base_dist_args, shift, scale, use_mean_variance, expected
+):
     distr = distributions.get_distribution_constructor(dist_name)(
-        loc=shift,
-        scale=scale,
+        **base_dist_args,
     )
     result = distributions._update_shift_scale(
         shift,
