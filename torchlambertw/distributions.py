@@ -2,9 +2,21 @@
 
 import torch
 
+from typing import Union, Dict
+
 from . import special
 from . import transforms
 import torch.distributions as td
+
+_PARAM_DTYPE = Union[float, torch.tensor]
+
+
+def _to_tensor(x: _PARAM_DTYPE) -> torch.Tensor:
+    """Converts to tensor if a float/int."""
+    if not isinstance(x, torch.Tensor):
+        return torch.tensor(x)
+
+    return x
 
 
 class TailLambertWDistribution(td.transformed_distribution.TransformedDistribution):
@@ -36,15 +48,17 @@ class TailLambertWDistribution(td.transformed_distribution.TransformedDistributi
 
     def __init__(
         self,
-        base_distribution,
-        base_dist_args,
-        shift,
-        scale,
-        tailweight,
+        base_distribution: torch.distributions.Distribution,
+        base_dist_args: Dict[str, _PARAM_DTYPE],
+        shift: _PARAM_DTYPE,
+        scale: _PARAM_DTYPE,
+        tailweight: _PARAM_DTYPE,
         validate_args=None,
     ):
-        self.tailweight = tailweight
-        self.shift = shift
+        self.shift = _to_tensor(shift)
+        self.tailweight = _to_tensor(tailweight)
+        scale = _to_tensor(scale)
+
         super().__init__(
             base_distribution=base_distribution(
                 **base_dist_args, validate_args=validate_args
@@ -105,16 +119,17 @@ class TailLambertWNormal(td.transformed_distribution.TransformedDistribution):
     support = td.constraints.real
     has_rsample = True
 
-    def __init__(self, loc, scale, tailweight, validate_args=None):
-
-        if not isinstance(loc, torch.Tensor):
-            loc = torch.tensor(loc)
-
-        if not isinstance(scale, torch.Tensor):
-            scale = torch.tensor(scale)
-
-        if not isinstance(tailweight, torch.Tensor):
-            tailweight = torch.tensor(tailweight)
+    def __init__(
+        self,
+        loc: _PARAM_DTYPE,
+        scale: _PARAM_DTYPE,
+        tailweight: _PARAM_DTYPE,
+        validate_args=None,
+    ):
+        """Initializes the class."""
+        loc = _to_tensor(loc)
+        scale = _to_tensor(scale)
+        tailweight = _to_tensor(tailweight)
 
         self.tailweight = tailweight
         super().__init__(
@@ -186,15 +201,17 @@ class SkewLambertWDistribution(td.transformed_distribution.TransformedDistributi
 
     def __init__(
         self,
-        base_distribution,
-        base_dist_args,
-        shift,
-        scale,
-        skewweight,
+        base_distribution: torch.distributions.Distribution,
+        base_dist_args: Dict[str, _PARAM_DTYPE],
+        shift: _PARAM_DTYPE,
+        scale: _PARAM_DTYPE,
+        skewweight: _PARAM_DTYPE,
         validate_args=None,
     ):
-        self.skewweight = skewweight
-        self.shift = shift
+        self.skewweight = _to_tensor(skewweight)
+        self.shift = _to_tensor(shift)
+        # Not self.scale since a .scale is a propery of Distribution object.
+        scale = _to_tensor(scale)
         super().__init__(
             base_distribution=base_distribution(
                 **base_dist_args, validate_args=validate_args
@@ -255,8 +272,14 @@ class SkewLambertWNormal(td.transformed_distribution.TransformedDistribution):
     support = td.constraints.real
     has_rsample = True
 
-    def __init__(self, loc, scale, skewweight, validate_args=None):
-        self.skewweight = skewweight
+    def __init__(
+        self,
+        loc: _PARAM_DTYPE,
+        scale: _PARAM_DTYPE,
+        skewweight: _PARAM_DTYPE,
+        validate_args=None,
+    ):
+        self.skewweight = _to_tensor(skewweight)
         super().__init__(
             base_distribution=td.Normal(
                 loc=loc, scale=scale, validate_args=validate_args
@@ -329,7 +352,9 @@ class SkewLambertWExponential(td.transformed_distribution.TransformedDistributio
     support = td.constraints.nonnegative
     has_rsample = True
 
-    def __init__(self, rate, skewweight, validate_args=None):
+    def __init__(
+        self, rate: _PARAM_DTYPE, skewweight: _PARAM_DTYPE, validate_args=None
+    ):
         self.skewweight = skewweight
         self.rate = rate
         super().__init__(
