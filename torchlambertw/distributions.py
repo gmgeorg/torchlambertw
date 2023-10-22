@@ -129,12 +129,20 @@ class TailLambertWDistribution(td.transformed_distribution.TransformedDistributi
         validate_args=None,
     ):
         """Initialize the distribution."""
-        self.shift = _to_tensor(shift)
-        self.tailweight = _to_tensor(tailweight)
+
+        assert isinstance(use_mean_variance, bool)
         self.use_mean_variance = use_mean_variance
-        scale = _to_tensor(scale)
 
         base_distr = base_distribution(**base_dist_args, validate_args=validate_args)
+        shift, scale = _update_shift_scale(
+            shift,
+            scale,
+            distribution=base_distr,
+            use_mean_variance=self.use_mean_variance,
+        )
+        self.shift = _to_tensor(shift)
+        self.tailweight = _to_tensor(tailweight)
+
         super().__init__(
             base_distribution=base_distr,
             transforms=transforms.TailLambertWTransform(
@@ -283,13 +291,20 @@ class SkewLambertWDistribution(td.transformed_distribution.TransformedDistributi
         scale: Optional[_PARAM_DTYPE] = None,
         validate_args=None,
     ):
-        self.skewweight = _to_tensor(skewweight)
-        self.shift = _to_tensor(shift)
+        assert isinstance(use_mean_variance, bool)
         self.use_mean_variance = use_mean_variance
 
-        # Not self.scale since a .scale is a propery of Distribution object.
-        scale = _to_tensor(scale)
+        self.skewweight = _to_tensor(skewweight)
         base_distr = base_distribution(**base_dist_args, validate_args=validate_args)
+
+        shift, scale = _update_shift_scale(
+            shift,
+            scale,
+            distribution=base_distr,
+            use_mean_variance=self.use_mean_variance,
+        )
+
+        self.shift = _to_tensor(shift)
 
         super().__init__(
             base_distribution=base_distr,
