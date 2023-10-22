@@ -2,7 +2,7 @@
 
 import torch
 
-from typing import Union, Dict
+from typing import Union, Dict, Optional, Tuple, List
 
 from . import special
 from . import transforms
@@ -11,12 +11,84 @@ import torch.distributions as td
 _PARAM_DTYPE = Union[float, torch.tensor]
 
 
+_LOCATION_FAMILY_DISTRIBUTIONS = [
+    "Beta",  # if parameterized for BetaRegression as in Ferrari-Neto (https://www.ime.usp.br/~sferrari/beta.pdf)
+    "Normal",
+    "Uniform",
+    "Cauchy",
+    "Laplace",
+    "LogNormal",
+    "Pareto",
+    "StudentT",
+]
+
+
+def is_location_family(distribution_name: str) -> bool:
+    """Is the distribution a location family."""
+    assert isinstance(distribution_name, str)
+    return distribution_name in _LOCATION_FAMILY_DISTRIBUTIONS
+
+
+def get_distribution_name(distribution: torch.distributions.Distribution) -> str:
+    # Get the type of the distribution and extract its name
+    dist_type = type(distribution)
+    dist_name = dist_type.__name__
+    return dist_name
+
+
+def get_distribution_constructor(
+    distribution_name: str,
+) -> torch.distributions.Distribution:
+    assert isinstance(distribution_name, str)
+    # Use getattr to get the distribution class constructor by name
+    return getattr(torch.distributions, distribution_name)
+
+
+def get_distribution_args(
+    distribution_constructur: torch.distributions.Distribution,
+) -> List[str]:
+    """Gets the parameter names for a distribution constructor."""
+    assert isinstance(distribution_constructur, Callable)
+    constructor_signature = inspect.signature(distribution_constructur.__init__)
+    args = [
+        param
+        for param in constructor_signature.parameters.keys()
+        if param not in _DROP_ARGS_NAMES
+    ]
+
+    return args
+
+
 def _to_tensor(x: _PARAM_DTYPE) -> torch.Tensor:
     """Converts to tensor if a float/int."""
     if not isinstance(x, torch.Tensor):
         return torch.tensor(x)
 
     return x
+
+
+def _update_shift_scale(
+    shift: Optional[_PARAM_DTYPE],
+    scale: Optional[_PARAM_DTYPE],
+    distribution: torch.distributions.Distribution,
+    use_mean_variance: bool,
+) -> Tuple[_PARAM_DTYPE, _PARAM_DTYPE]:
+    """Updates shift/scale parameters depending on distribution."""
+    if shift is None:
+        shift = distribution.mean
+        if not use_mean_variance:
+            shift = distribution.loc
+
+        if not is_location_family(get_distribution_name(distribution)):
+            shift = 0.0
+
+    if scale is None:
+        scale = distribution.stddev
+
+        if not use_mean_variance:
+            scale = distribution.scale
+
+    return (_to_tensor(shift), _to_tensor(scale))
 
 
 class TailLambertWDistribution(td.transformed_distribution.TransformedDistribution):
@@ -50,15 +122,16 @@ class TailLambertWDistribution(td.transformed_distribution.TransformedDistributi
         self,
         base_distribution: torch.distributions.Distribution,
         base_dist_args: Dict[str, _PARAM_DTYPE],
-        shift: _PARAM_DTYPE,
-        scale: _PARAM_DTYPE,
         tailweight: _PARAM_DTYPE,
         use_mean_variance: bool = True,
+        shift: Optional[_PARAM_DTYPE] = None,
+        scale: Optional[_PARAM_DTYPE] = None,
         validate_args=None,
     ):
         """Initialize the distribution."""
         self.shift = _to_tensor(shift)
         self.tailweight = _to_tensor(tailweight)
+        self.use_mean_variance = use_mean_variance
         scale = _to_tensor(scale)
 
         base_distr = base_distribution(**base_dist_args, validate_args=validate_args)
@@ -204,14 +277,16 @@ class SkewLambertWDistribution(td.transformed_distribution.TransformedDistributi
         self,
         base_distribution: torch.distributions.Distribution,
         base_dist_args: Dict[str, _PARAM_DTYPE],
-        shift: _PARAM_DTYPE,
-        scale: _PARAM_DTYPE,
         skewweight: _PARAM_DTYPE,
         use_mean_variance: bool = True,
+        shift: Optional[_PARAM_DTYPE] = None,
+        scale: Optional[_PARAM_DTYPE] = None,
         validate_args=None,
     ):
         self.skewweight = _to_tensor(skewweight)
         self.shift = _to_tensor(shift)
+        self.use_mean_variance = use_mean_variance
+
         # Not self.scale since a .scale is a propery of Distribution object.
         scale = _to_tensor(scale)
         base_distr = base_distribution(**base_dist_args, validate_args=validate_args)
