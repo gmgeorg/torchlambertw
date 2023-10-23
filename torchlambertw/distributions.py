@@ -1,8 +1,9 @@
 """Module for Lambert W x F distributions."""
 
 import torch
+import inspect
 
-from typing import Union, Dict, Optional, Tuple, List
+from typing import Union, Dict, Optional, Tuple, List, Callable
 
 from . import special
 from . import transforms
@@ -22,6 +23,9 @@ _LOCATION_FAMILY_DISTRIBUTIONS = [
 ]
 
 
+_DROP_ARGS_NAMES = ["self", "validate_args", "logits", "args", "kwargs"]
+
+
 def is_location_family(distribution_name: str) -> bool:
     """Is the distribution a location family."""
     assert isinstance(distribution_name, str)
@@ -29,7 +33,7 @@ def is_location_family(distribution_name: str) -> bool:
 
 
 def get_distribution_name(distribution: torch.distributions.Distribution) -> str:
-    # Get the type of the distribution and extract its name
+    """Get the name of the torch.distribution.Distribution"""
     dist_type = type(distribution)
     dist_name = dist_type.__name__
     return dist_name

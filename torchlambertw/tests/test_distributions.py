@@ -106,3 +106,17 @@ def test_identity_s(loc, scale, gamma, eps):
     lw_log_probs = lw_skew_distr.log_prob(x)
     log_probs = distr.log_prob(x)
     np.testing.assert_allclose(log_probs.numpy(), lw_log_probs.numpy(), atol=eps)
+
+
+@pytest.mark.parametrize(
+    "dist_name,expected",
+    [
+        ("Normal", ["loc", "scale"]),
+        ("Exponential", ["rate"]),
+        ("StudentT", ["loc", "scale", "df"]),
+    ],
+)
+def test_get_distribution_args(dist_name, expected):
+    distr_constr = distributions.get_distribution_constructor(dist_name)
+    args = distributions.get_distribution_args(distr_constr)
+    assert set(args) == set(expected)
