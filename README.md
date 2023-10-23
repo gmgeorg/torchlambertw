@@ -8,7 +8,7 @@
 ![Github All Releases](https://img.shields.io/github/downloads/gmgeorg/pypsps/total.svg)
 
 
-**IMPORTANT**: This is *NOT* ready for use.  This is just a prototype serving as basis of discussion in https://github.com/pytorch/pytorch/issues/108948. 
+**IMPORTANT**: This is *NOT* ready for use.  This is just a prototype serving as basis of discussion in https://github.com/pytorch/pytorch/issues/108948.
 
 This has not been properly tested w/ all pytorch functionality and should not be used other than for prototyping/R&D.
 
@@ -64,11 +64,11 @@ def plot_lambertW(range_start, range_end, num_points=2000):
     x_values_torch = torch.tensor(x_values)
     principal_branch_values = special.lambertw(x_values_torch, k=0).numpy()
     non_principal_branch_values = special.lambertw(x_values_torch, k=-1).numpy()
-    
+
     plt.figure(figsize=(8, 5))
     plt.plot(x_values, principal_branch_values, label="Principal Branch", color='blue')
     plt.plot(x_values, non_principal_branch_values, label="Non-Principal Branch", color='red')
-    
+
     plt.title("Lambert W Function")
     plt.xlabel("x")
     plt.ylabel("W(x)")
@@ -77,7 +77,7 @@ def plot_lambertW(range_start, range_end, num_points=2000):
     plt.axhline(0, color='black', linestyle='--', linewidth=0.5)
     plt.axvline(0, color='black', linestyle='--', linewidth=0.5)
     plt.legend()
-    
+
     plt.grid(True)
     plt.show()
 
@@ -98,7 +98,7 @@ Lambert W x F distributions are a generalized family of distributions, that take
 ![Lambert W Function](imgs/input_output_system_tail.png)
 
 
-For parameter values of 0, the new variable collapses to X, which means that Lambert W x F distributions always contain the original base distribution F as a special case.  Ie it does not hurt to impose a Lambert W x F distribution on your data; worst case, parameter estimates are 0 and you get F back; best case: you properly account for skewness & heavy-tails in your data and can even remove it (by transforming data back to having X ~ F). The such obtained random variable / data / distribution is then a Lambert W x F distribution. 
+For parameter values of 0, the new variable collapses to X, which means that Lambert W x F distributions always contain the original base distribution F as a special case.  Ie it does not hurt to impose a Lambert W x F distribution on your data; worst case, parameter estimates are 0 and you get F back; best case: you properly account for skewness & heavy-tails in your data and can even remove it (by transforming data back to having X ~ F). The such obtained random variable / data / distribution is then a Lambert W x F distribution.
 
 The convenient part about this is that when working with data y1, ..., yn, you can estimate the transformation from the data and transform it back into the (unobserved) x1, ..., xn.  This is particularly useful when X ~ Normal(loc, scale), as then you can "Gaussianize" your data.
 
@@ -108,7 +108,7 @@ distribution by just using the skewed & heavy tail Lambert W transform here impl
 See [demo notebook](notebooks/demo-lambertw-f-distributions.ipynb) for details.
 
 
-### Heavy-tail Lambert W x F distributions 
+### Heavy-tail Lambert W x F distributions
 
 Here is an illustration of a heavy-tail Lambert W x Gaussian distribution, which takes a Gaussian input and turns it into something heavy-tailed. If `tailweight = 0` then its just a Gaussian again.
 
@@ -116,10 +116,10 @@ Here is an illustration of a heavy-tail Lambert W x Gaussian distribution, which
 from torchlambertw import distributions as tlwd
 
 # Implements a Lambert W x Normal distribution with (loc=1, scale=3, tailweight=0.75)
-m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]), 
-                        scale=torch.tensor([3.0]), 
+m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]),
+                        scale=torch.tensor([3.0]),
                         tailweight=torch.tensor([0.75]))
-m.sample((2,)) 
+m.sample((2,))
 ```
 ```
 tensor([[ 0.0159], [-0.9322]])
@@ -139,7 +139,7 @@ Let's draw a random sample from distribution and plot density / ecdfplot.
 ```python
 torch.manual_seed(0)
 # Use a less heavy-tailed distribution with a tail parameter of 0.25 (ie moments < 1/0.25 = 4 exist).
-m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]), 
+m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]),
                         tailweight=torch.tensor([0.25]))
 y = m.sample((1000,)).numpy().ravel()
 
@@ -165,7 +165,7 @@ Let's assume you have the parameters estimated; then you can use this to obtain 
 ```python
 torch.manual_seed(0)
 
-m = tlwd.LambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]), 
+m = tlwd.LambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]),
                         tailweight=torch.tensor([0.25]))
 
 y = m.sample((1000,)).numpy().ravel()
@@ -210,11 +210,11 @@ https://github.com/AminJun/BreakingCertifiableDefenses/blob/cc469fa48f7efba21f35
 ## References
 
 * Corless, R.M., et al. (1996) On the LambertW Function. Advances in Computational Mathematics, 5, 329-359.
-https://doi.org/10.1007/BF02124750 
+https://doi.org/10.1007/BF02124750
 
 * Lambert W implementation in TensorFlow: https://www.tensorflow.org/probability/api_docs/python/tfp/math/lambertw
 
-* Goerg (2011). *Lambert W random variables—a new family of generalized skewed distributions with applications to risk estimation.* Ann. Appl. Stat. 5 (3) 2197 - 2230, 2011. https://doi.org/10.1214/11-AOAS457 
+* Goerg (2011). *Lambert W random variables—a new family of generalized skewed distributions with applications to risk estimation.* Ann. Appl. Stat. 5 (3) 2197 - 2230, 2011. https://doi.org/10.1214/11-AOAS457
 
 * Goerg (2015) *The Lambert Way to Gaussianize Heavy-Tailed Data with the Inverse of Tukey’s h Transformation as a Special Case*. The Scientific World Journal. Volume 2015 | Article ID 909231 | https://doi.org/10.1155/2015/909231
 

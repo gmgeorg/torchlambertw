@@ -15,10 +15,7 @@ def _test_data():
     return torch.tensor(x)
 
 
-@pytest.mark.parametrize(
-    "gamma",
-    [(-0.1), (0.0), (0.1), (0.2)],
-)
+@pytest.mark.parametrize("gamma", [(-0.1), (0.0), (0.1), (0.2)])
 def test_w_gamma(gamma):
     u = _test_data()
     u_gamma = transforms.H_gamma(u, gamma=gamma)
@@ -26,10 +23,7 @@ def test_w_gamma(gamma):
     np.testing.assert_allclose(u.numpy(), w_u_gamma.numpy())
 
 
-@pytest.mark.parametrize(
-    "delta",
-    [(-0.1), (0.0), (0.1), (0.2)],
-)
+@pytest.mark.parametrize("delta", [(-0.1), (0.0), (0.1), (0.2)])
 def test_w_delta(delta):
     u = _test_data()
     u_delta = transforms.G_delta(u, delta=delta)
@@ -41,8 +35,7 @@ def test_w_delta(delta):
 
 
 @pytest.mark.parametrize(
-    "loc,scale,delta",
-    [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)],
+    "loc,scale,delta", [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)]
 )
 def test_torch_transform_inverse_equality(loc, scale, delta):
     x = _test_data()

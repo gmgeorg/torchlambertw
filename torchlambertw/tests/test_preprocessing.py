@@ -42,8 +42,7 @@ def test_identity_transform(loc, scale, delta, eps):
 
 
 @pytest.mark.parametrize(
-    "loc,scale,delta",
-    [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)],
+    "loc,scale,delta", [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)]
 )
 def test_np_transform_inverse_equality(loc, scale, delta):
     x = _test_data()

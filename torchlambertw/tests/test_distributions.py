@@ -10,11 +10,7 @@ from torchlambertw import distributions
 
 
 @pytest.mark.parametrize(
-    "dist_name,expected",
-    [
-        ("Normal", True),
-        ("Exponential", False),
-    ],
+    "dist_name,expected", [("Normal", True), ("Exponential", False)]
 )
 def test_is_location_family(dist_name, expected):
     assert distributions.is_location_family(dist_name) == expected
@@ -33,14 +29,9 @@ def test_is_location_family(dist_name, expected):
 def test_update_shift_scale(
     dist_name, base_dist_args, shift, scale, use_mean_variance, expected
 ):
-    distr = distributions.get_distribution_constructor(dist_name)(
-        **base_dist_args,
-    )
+    distr = distributions.get_distribution_constructor(dist_name)(**base_dist_args)
     result = distributions._update_shift_scale(
-        shift,
-        scale,
-        distr,
-        use_mean_variance=use_mean_variance,
+        shift, scale, distr, use_mean_variance=use_mean_variance
     )
     exptected_tensor = tuple([distributions._to_tensor(v) for v in expected])
     assert result == exptected_tensor
@@ -63,11 +54,7 @@ def test_get_distribution_constructor(
 
 
 @pytest.mark.parametrize(
-    "loc,scale,delta,eps",
-    [
-        (0.0, 1.0, 0.0, 1e-6),
-        (0.4, 2.0, 0.0, 1e-6),
-    ],
+    "loc,scale,delta,eps", [(0.0, 1.0, 0.0, 1e-6), (0.4, 2.0, 0.0, 1e-6)]
 )
 def test_identity_h(loc, scale, delta, eps):
     distr = torch.distributions.Normal(loc=loc, scale=scale)
@@ -86,11 +73,7 @@ def test_identity_h(loc, scale, delta, eps):
 
 
 @pytest.mark.parametrize(
-    "loc,scale,gamma,eps",
-    [
-        (0.0, 1.0, 0.0, 1e-6),
-        (0.4, 2.0, 0.0, 1e-6),
-    ],
+    "loc,scale,gamma,eps", [(0.0, 1.0, 0.0, 1e-6), (0.4, 2.0, 0.0, 1e-6)]
 )
 def test_identity_s(loc, scale, gamma, eps):
     distr = torch.distributions.Normal(loc=loc, scale=scale)
