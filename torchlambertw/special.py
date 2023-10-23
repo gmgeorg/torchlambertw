@@ -9,9 +9,10 @@ Vectorized, except for while loop. TODO to make this work in vectorized/GPU vers
 (equivalent of tf.while_loop() in TensorFlow).
 """
 
-from typing import Tuple, Optional
-import torch
+from typing import Optional, Tuple
+
 import numpy as np
+import torch
 
 _EPS = torch.finfo(torch.float64).eps
 # Constant for - 1 / e.  This is the lowest 'z' for which principal / non-principal W

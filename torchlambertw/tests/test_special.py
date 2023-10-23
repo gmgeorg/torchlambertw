@@ -1,10 +1,11 @@
 """Module for testing special module."""
 
-import torch
-import numpy as np
-import scipy.special
-import pytest
 import timeit
+
+import numpy as np
+import pytest
+import scipy.special
+import torch
 
 from .. import special
 

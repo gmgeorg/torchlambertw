@@ -1,13 +1,12 @@
 """Module for Lambert W x F distributions."""
 
-import torch
 import inspect
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from typing import Union, Dict, Optional, Tuple, List, Callable
-
-from . import special
-from . import transforms
+import torch
 import torch.distributions as td
+
+from . import special, transforms
 
 _PARAM_DTYPE = Union[float, torch.tensor]
 
