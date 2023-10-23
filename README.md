@@ -29,10 +29,6 @@ While this library is for now standalone, the goal is to get both the mathematic
 See also https://github.com/pytorch/pytorch/issues/108948.
 
 
-This package goes hand in hand with the **pylambertw** module, which can be used to train / learn distribution parameters from data and using them to gaussianize/transform skewed & heavy-tailed data.
-See [here](TODO) for details.
-
-
 ## Installation
 
 It can be installed directly from GitHub using:
@@ -120,9 +116,9 @@ Here is an illustration of a heavy-tail Lambert W x Gaussian distribution, which
 from torchlambertw import distributions as tlwd
 
 # Implements a Lambert W x Normal distribution with (loc=1, scale=3, tailweight=0.75)
-m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]),
-                        scale=torch.tensor([3.0]),
-                        tailweight=torch.tensor([0.75]))
+m = tlwd.TailLambertWNormal(loc=1.0,
+                        scale=3.0,
+                        tailweight=0.75)
 m.sample((2,))
 ```
 ```
@@ -143,8 +139,8 @@ Let's draw a random sample from distribution and plot density / ecdfplot.
 ```python
 torch.manual_seed(0)
 # Use a less heavy-tailed distribution with a tail parameter of 0.25 (ie moments < 1/0.25 = 4 exist).
-m = tlwd.TailLambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]),
-                        tailweight=torch.tensor([0.25]))
+m = tlwd.TailLambertWNormal(loc=1.0, scale=3.0,
+                        tailweight=0.25)
 y = m.sample((1000,)).numpy().ravel()
 
 import seaborn as sns
@@ -162,15 +158,15 @@ plt.show()
 
 #### Back-transformation
 
-The parameters `(loc, scale, tailweight)` can be estimated from the data (see **LambertW** R package or also the `gaussianize` package for an **sklearn** wrapper) -- see also https://github.com/gmgeorg/torchlambertw/issues/2.
+The parameters `(loc, scale, tailweight)` can be estimated from the data (see **LambertW** R package or also the `gaussianize` package for an **sklearn** wrapper).
 
 Let's assume you have the parameters estimated; then you can use this to obtain the unobserved, Gaussian data:
 
 ```python
 torch.manual_seed(0)
 
-m = tlwd.LambertWNormal(loc=torch.tensor([1.0]), scale=torch.tensor([3.0]),
-                        tailweight=torch.tensor([0.25]))
+m = tlwd.LambertWNormal(loc=1.0, scale=3.0,
+                        tailweight=0.25)
 
 y = m.sample((1000,)).numpy().ravel()
 x = m.transforms[0]._inverse(torch.tensor(y)).numpy().ravel()
@@ -205,7 +201,6 @@ This implementation closely follows the TensorFlow Probability version in [`tfp.
 * R package / C++: [**lamw**](https://github.com/aadler/lamW)
 
 
-
 See also [here](https://github.com/thibsej/unbalanced-ot-functionals/blob/13f2203b3993d973f929578085ea458c5c1a7a78/common/torch_lambertw.py) and [here](
 https://github.com/AminJun/BreakingCertifiableDefenses/blob/cc469fa48f7efba21f3584e233c4db0c9a4856c1/RandomizedSmoothing/projected_sinkhorn/lambertw.py
 )) for minimum example `pytorch` implementations [not optimized for fast iteration though and good starting points.]
@@ -221,6 +216,8 @@ https://doi.org/10.1007/BF02124750
 * Goerg (2011). *Lambert W random variables—a new family of generalized skewed distributions with applications to risk estimation.* Ann. Appl. Stat. 5 (3) 2197 - 2230, 2011. https://doi.org/10.1214/11-AOAS457
 
 * Goerg (2015) *The Lambert Way to Gaussianize Heavy-Tailed Data with the Inverse of Tukey’s h Transformation as a Special Case*. The Scientific World Journal. Volume 2015 | Article ID 909231 | https://doi.org/10.1155/2015/909231
+
+* Goerg (2016) *Rebuttal of the 'Letter to the Editor' of Annals of Applied Statistics on Lambert W x F Distributions and the IGMM Algorithm*. https://arxiv.org/abs/1602.02200
 
 * Käärik, Meelis & Selart, Anne & Puhkim, Tuuli & Tee, Liivika. (2023). *Lambert W random variables and their applications in loss modelling*. https://arxiv.org/pdf/2307.05644.pdf
 
