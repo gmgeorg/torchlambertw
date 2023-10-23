@@ -5,12 +5,12 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
-![Github All Releases](https://img.shields.io/github/downloads/gmgeorg/pypsps/total.svg)
+![Github All Releases](https://img.shields.io/github/downloads/gmgeorg/torchlambertw/total.svg)
 
 
-**IMPORTANT**: This is *NOT* ready for use.  This is just a prototype serving as basis of discussion in https://github.com/pytorch/pytorch/issues/108948.
+**IMPORTANT**: This is the very first version of a torch-native implementation of the Lambert W function and Lambert W x F distributions in `torch`. For now this is a prototype serving as reference for discussion in https://github.com/pytorch/pytorch/issues/108948.
 
-This has not been properly tested w/ all pytorch functionality and should not be used other than for prototyping/R&D.
+This should not be used other than for prototyping/R&D (see also `LICENSE`).
 
 See https://github.com/gmgeorg/torchlambertw/issues for remaining issues/TODOs.
 
@@ -24,9 +24,13 @@ This library is a native implementation in `pytorch` of
 
  * Lambert W x F distributions (`torch.distributions`)
 
-While this library is for now standalone, the goal is to get both the mathematicla function as well as the distributions into `torch` core package.
+While this library is for now standalone, the goal is to get both the mathematical function as well as the distributions into `torch` core package.
 
 See also https://github.com/pytorch/pytorch/issues/108948.
+
+
+This package goes hand in hand with the **pylambertw** module, which can be used to train / learn distribution parameters from data and using them to gaussianize/transform skewed & heavy-tailed data.
+See [here](TODO) for details.
 
 
 ## Installation
