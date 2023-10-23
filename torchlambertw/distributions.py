@@ -12,7 +12,6 @@ _PARAM_DTYPE = Union[float, torch.tensor]
 
 
 _LOCATION_FAMILY_DISTRIBUTIONS = [
-    "Beta",  # if parameterized for BetaRegression as in Ferrari-Neto (https://www.ime.usp.br/~sferrari/beta.pdf)
     "Normal",
     "Uniform",
     "Cauchy",
@@ -74,12 +73,13 @@ def _update_shift_scale(
     use_mean_variance: bool,
 ) -> Tuple[_PARAM_DTYPE, _PARAM_DTYPE]:
     """Updates shift/scale parameters depending on distribution."""
+    is_loc_fam = is_location_family(get_distribution_name(distribution))
     if shift is None:
         shift = distribution.mean
-        if not use_mean_variance:
+        if not use_mean_variance and is_loc_fam:
             shift = distribution.loc
 
-        if not is_location_family(get_distribution_name(distribution)):
+        if not is_loc_fam:
             shift = 0.0
 
     if scale is None:
