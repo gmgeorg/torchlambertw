@@ -1,0 +1,7 @@
+[tool.ruff]
+line-length = 100
+
+# Never enforce `E501` (line length violations).
+ignore = ['E501']
+
+fix = true
