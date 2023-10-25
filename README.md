@@ -26,6 +26,14 @@ While this library is for now standalone, the goal is to get both the mathematic
 
 See also https://github.com/pytorch/pytorch/issues/108948.
 
+**IMPORTANT**: See also the accompanying [**pylambertw**](https://github.com/gmgeorg/pylambertw) 
+module which uses `torchlambertw` under the hood to train distribution parameters and
+can be used to Gaussianize skewed, heavy-tailed data.
+
+The `torchlambertw` module here is solely focused on providing the building blocks
+for Lambert W functions and Lambert W x F distributions.  If you are interested
+in using Transformations and estimating parameters of these distributions, take a look
+at the **pylambertw** instead.
 
 ## Installation
 
@@ -154,7 +162,7 @@ plt.show()
 
 #### Back-transformation
 
-The parameters `(loc, scale, tailweight)` can be estimated from the data (see the [**LambertW** R package](https://github.com/gmgeorg/LambertW) - stay tuned for an upcoming Python implementation).
+The parameters `(loc, scale, tailweight)` can be estimated from the data using the accompanying [**pylambertw**](https://github.com/gmgeorg/pylambertw) module (see also [**LambertW** R package](https://github.com/gmgeorg/LambertW)).
 
 Let's say you have the estimated parameters; then you can obtain the unobserved, Gaussian data using:
 
