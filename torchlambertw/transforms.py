@@ -9,17 +9,14 @@ Lambert W transforms and Lambert W x F distributions come in 2 flavors:
 Transform names follow TensorFlow probability naming convention.
 """
 
-from typing import Union
 import torch
 import torch.distributions as td
 
 from . import special
-
-_EPS = torch.finfo(torch.float32).eps
-_PARAM_DTYPE = Union[float, torch.tensor]
+from . import constants as con
 
 
-def _to_tensor(x: _PARAM_DTYPE) -> torch.Tensor:
+def _to_tensor(x: con.PARAM_DTYPE) -> torch.Tensor:
     """Converts to tensor if a float/int."""
     if not isinstance(x, torch.Tensor):
         return torch.tensor(x)
@@ -36,7 +33,7 @@ def W_gamma(z: torch.Tensor, gamma: torch.Tensor, k: int) -> torch.Tensor:
     """Computes W_gamma(z), the inverse of H_gamma(u)."""
     gamma = _to_tensor(gamma)
     return torch.where(
-        torch.abs(gamma) < _EPS,
+        torch.abs(gamma) < con.EPS,
         z,
         special.lambertw(gamma * z, k=k) / gamma,
     )
@@ -58,7 +55,7 @@ def W_delta(z: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
     """Computes W_delta(z), the inverse of G_delta(u)."""
     delta_z2 = delta * z * z
     return torch.where(
-        torch.abs(delta_z2) < _EPS,
+        torch.abs(delta_z2) < con.EPS,
         z,
         torch.sqrt(special.lambertw(delta_z2, k=0) / delta) * torch.sign(z),
     )
@@ -111,7 +108,7 @@ class TailLambertWTransform(td.transforms.Transform):
         u_sq = self._normalize(x).pow(2.0)
         # absolute value not needed as all terms here are >= 0.
         return torch.log(
-            (1 + self.tailweight * u_sq) * torch.exp(0.5 * self.tailweight * u_sq)
+            (1.0 + self.tailweight * u_sq) * torch.exp(0.5 * self.tailweight * u_sq)
         )
 
 

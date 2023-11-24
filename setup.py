@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="torchlambertw",
-    version="0.0.1",
+    version="0.0.2",
     url="https://github.com/gmgeorg/torchlambertw.git",
     author="Georg M. Goerg",
     author_email="im@gmge.org",
