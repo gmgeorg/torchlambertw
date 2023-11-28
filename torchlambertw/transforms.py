@@ -162,5 +162,5 @@ class SkewLambertWTransform(td.transforms.Transform):
     def log_abs_det_jacobian(self, x, y):
         u = self._normalize(x)
         return torch.log(
-            torch.abs((self.skewweight * u + 1.0) * torch.exp(-self.skewweight * u))
+            torch.abs((self.skewweight * u + 1.0) * torch.exp(self.skewweight * u))
         )
