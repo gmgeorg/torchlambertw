@@ -3,12 +3,86 @@
 import torch
 import torch.distributions as td
 
+from . import base
+
 from .. import transforms
 from . import utils
 from .. import constants as con
 
 
-class TailLambertWNormal(td.transformed_distribution.TransformedDistribution):
+# class TailLambertWNormal2(td.transformed_distribution.TransformedDistribution):
+#     r"""
+#     Creates a heavy-tail Lambert W x Normal distribution parameterized by
+#     `loc`, `scale`, and `tailweight` where::
+
+#         X ~ Normal(loc, scale)
+#         U = (X - loc) / scale
+#         Z = U * exp(tailweight / 2. * U^2)
+#         Y = Z * scale + loc
+#         Y ~ Lambert W x Normal(loc, scale, tailweight)
+
+#     Args:
+#         loc (float or Tensor): mean of latent Normal distribution
+#         scale (float or Tensor): standard deviation of latent Normal distribution
+#         tailweight (float or Tensor): tailweight ("delta") of the Lambert W x Normal distribution.
+#           If 0., then it reduces to a Normal(loc, scale) distribution.
+#     """
+
+#     def __init__(
+#         self,
+#         loc: con.PARAM_DTYPE,
+#         scale: con.PARAM_DTYPE,
+#         tailweight: con.PARAM_DTYPE,
+#         validate_args=None,
+#     ):
+#         """Initializes the class."""
+#         loc = utils.to_tensor(loc)
+#         scale = utils.to_tensor(scale)
+#         tailweight = utils.to_tensor(tailweight)
+
+#         self.tailweight = tailweight
+#         super().__init__(
+#             base_distribution=td.Normal(
+#                 loc=loc, scale=scale, validate_args=validate_args
+#             ),
+#             transforms=transforms.TailLambertWTransform(
+#                 shift=loc, scale=scale, tailweight=tailweight
+#             ),
+#             validate_args=validate_args,
+#         )
+#         print(self.arg_constraints)
+
+#     def expand(self, batch_shape, _instance=None):
+#         new = self._get_checked_instance(TailLambertWNormal, _instance)
+#         return super().expand(batch_shape, _instance=new)
+
+#     @property
+#     def loc(self):
+#         return self.base_dist.loc
+
+#     @property
+#     def scale(self):
+#         return self.base_dist.scale
+
+#     @property
+#     def mean(self):
+#         loc_abs_times_tailweight = (self.base_dist.loc.abs() + 1) * (
+#             1.0 - self.tailweight
+#         )
+#         return torch.where(loc_abs_times_tailweight > 0, self.base_dist.loc, torch.nan)
+
+#     @property
+#     def mode(self):
+#         return self.base_dist.loc
+
+#     @property
+#     def variance(self):
+#         z_variance = 1.0 / torch.pow(1 - 2 * self.tailweight, 1.5)
+#         y_variance = z_variance * self.base_dist.scale.pow(2)
+#         return torch.where(y_variance > 0, y_variance, torch.inf)
+
+
+class TailLambertWNormal(base.TailLambertWDistribution):
     r"""
     Creates a heavy-tail Lambert W x Normal distribution parameterized by
     `loc`, `scale`, and `tailweight` where::
@@ -25,13 +99,6 @@ class TailLambertWNormal(td.transformed_distribution.TransformedDistribution):
         tailweight (float or Tensor): tailweight ("delta") of the Lambert W x Normal distribution.
           If 0., then it reduces to a Normal(loc, scale) distribution.
     """
-    arg_constraints = {
-        "loc": td.constraints.real,
-        "scale": td.constraints.positive,
-        "tailweight": td.constraints.greater_than_eq(0.0),
-    }
-    support = td.constraints.real
-    has_rsample = True
 
     def __init__(
         self,
@@ -47,13 +114,9 @@ class TailLambertWNormal(td.transformed_distribution.TransformedDistribution):
 
         self.tailweight = tailweight
         super().__init__(
-            base_distribution=td.Normal(
-                loc=loc, scale=scale, validate_args=validate_args
-            ),
-            transforms=transforms.TailLambertWTransform(
-                shift=loc, scale=scale, tailweight=tailweight
-            ),
-            validate_args=validate_args,
+            base_distribution=torch.distributions.Normal,
+            base_dist_args={"loc": loc, "scale": scale},
+            tailweight=tailweight,
         )
 
     def expand(self, batch_shape, _instance=None):
@@ -86,7 +149,7 @@ class TailLambertWNormal(td.transformed_distribution.TransformedDistribution):
         return torch.where(y_variance > 0, y_variance, torch.inf)
 
 
-class SkewLambertWNormal(td.transformed_distribution.TransformedDistribution):
+class SkewLambertWNormal(base.SkewLambertWDistribution):
     r"""
     Creates a skewed Lambert W x Normal distribution parameterized by
     `loc`, `scale`, and `skewweight` where::
@@ -103,13 +166,6 @@ class SkewLambertWNormal(td.transformed_distribution.TransformedDistribution):
         skewweight (float or Tensor): skewweight ("gamma") of the Lambert W x Normal distribution.
           If 0., then it reduces to a Normal(loc, scale) distribution.
     """
-    arg_constraints = {
-        "loc": td.constraints.real,
-        "scale": td.constraints.positive,
-        "skewweight": td.constraints.real,
-    }
-    support = td.constraints.real
-    has_rsample = True
 
     def __init__(
         self,
@@ -118,15 +174,14 @@ class SkewLambertWNormal(td.transformed_distribution.TransformedDistribution):
         skewweight: con.PARAM_DTYPE,
         validate_args=None,
     ):
+        loc = utils.to_tensor(loc)
+        scale = utils.to_tensor(scale)
         self.skewweight = utils.to_tensor(skewweight)
+
         super().__init__(
-            base_distribution=td.Normal(
-                loc=loc, scale=scale, validate_args=validate_args
-            ),
-            transforms=transforms.SkewLambertWTransform(
-                shift=loc, scale=scale, skewweight=skewweight
-            ),
-            validate_args=validate_args,
+            base_distribution=torch.distributions.Normal,
+            base_dist_args={"loc": loc, "scale": scale},
+            skewweight=self.skewweight,
         )
 
     def expand(self, batch_shape, _instance=None):

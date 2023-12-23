@@ -4,6 +4,7 @@ import torch
 import torch.distributions
 
 from . import base
+from . import utils
 
 
 class TailLambertWLogNormal(base.TailLambertWDistribution):
@@ -17,6 +18,11 @@ class TailLambertWLogNormal(base.TailLambertWDistribution):
         use_mean_variance: bool = True,
         **kwargs
     ):
+        loc = utils.to_tensor(loc)
+        scale = utils.to_tensor(scale)
+        tailweight = utils.to_tensor(tailweight)
+
+        self.tailweight = tailweight
         super().__init__(
             base_distribution=torch.distributions.LogNormal,
             base_dist_args={"loc": loc, "scale": scale},
@@ -37,6 +43,11 @@ class SkewLambertWLogNormal(base.SkewLambertWDistribution):
         use_mean_variance: bool = True,
         **kwargs
     ):
+        loc = utils.to_tensor(loc)
+        scale = utils.to_tensor(scale)
+        skewweight = utils.to_tensor(skewweight)
+
+        self.skewweight = skewweight
         super().__init__(
             base_distribution=torch.distributions.LogNormal,
             base_dist_args={"loc": loc, "scale": scale},

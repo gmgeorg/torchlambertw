@@ -29,12 +29,6 @@ class TailLambertWDistribution(td.transformed_distribution.TransformedDistributi
         tailweight (float or Tensor): tailweight ("delta") of the Lambert W x F distribution.
           If 0., then it reduces to a F(loc, scale) distribution.
     """
-    arg_constraints = {
-        "shift": td.constraints.real,
-        "scale": td.constraints.positive,
-        "tailweight": td.constraints.greater_than_eq(0.0),
-    }
-    support = td.constraints.real
     has_rsample = True
 
     def __init__(
@@ -69,6 +63,8 @@ class TailLambertWDistribution(td.transformed_distribution.TransformedDistributi
             ),
             validate_args=validate_args,
         )
+        self.arg_constraints = base_distr.arg_constraints.copy()
+        self.arg_constraints["tailweight"] = td.constraints.greater_than_eq(0.0)
 
     def expand(self, batch_shape, _instance=None):
         new = self._get_checked_instance(TailLambertWDistribution, _instance)
@@ -114,12 +110,6 @@ class SkewLambertWDistribution(td.transformed_distribution.TransformedDistributi
         tailweight (float or Tensor): tailweight ("delta") of the Lambert W x F distribution.
           If 0., then it reduces to a F(shift, scale) distribution.
     """
-    arg_constraints = {
-        "shift": td.constraints.real,
-        "scale": td.constraints.positive,
-        "skewweight": td.constraints.real,
-    }
-    support = td.constraints.real
     has_rsample = True
 
     def __init__(
@@ -154,6 +144,8 @@ class SkewLambertWDistribution(td.transformed_distribution.TransformedDistributi
             ),
             validate_args=validate_args,
         )
+        self.arg_constraints = base_distr.arg_constraints.copy()
+        self.arg_constraints["skewweight"] = td.constraints.real
 
     def expand(self, batch_shape, _instance=None):
         new = self._get_checked_instance(SkewLambertWDistribution, _instance)

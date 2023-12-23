@@ -3,6 +3,7 @@
 import torch
 
 from . import base
+from . import utils
 
 
 class TailLambertWExponential(base.TailLambertWDistribution):
@@ -15,6 +16,8 @@ class TailLambertWExponential(base.TailLambertWDistribution):
         use_mean_variance: bool = True,
         **kwargs
     ):
+        rate = utils.to_tensor(rate)
+        tailweight = utils.to_tensor(tailweight)
         super().__init__(
             base_distribution=torch.distributions.Exponential,
             base_dist_args={"rate": rate},
@@ -49,6 +52,8 @@ class SkewLambertWExponential(base.SkewLambertWDistribution):
         use_mean_variance: bool = True,
         **kwargs
     ):
+        rate = utils.to_tensor(rate)
+        skewweight = utils.to_tensor(skewweight)
         super().__init__(
             base_distribution=torch.distributions.Exponential,
             base_dist_args={"rate": rate},

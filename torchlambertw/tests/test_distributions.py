@@ -148,15 +148,115 @@ def test_skew_lw_distr(distr_constr, lambertw_distr_constr, params, gamma, eps):
 )
 def test_tail_lw_distr(distr_constr, lambertw_distr_constr, params, delta, eps):
     _ = distr_constr(**params)
-    lw_skew_distr = td.base.TailLambertWDistribution(
+    lw_tail_distr = td.base.TailLambertWDistribution(
         base_distribution=distr_constr,
         base_dist_args=params,
         tailweight=delta,
         use_mean_variance=True,
     )
-    lw_skew_distr2 = lambertw_distr_constr(tailweight=delta, **params)
+    lw_tail_distr2 = lambertw_distr_constr(tailweight=delta, **params)
 
     x = torch.tensor(np.linspace(1, 3, 100))
-    lw_log_probs = lw_skew_distr.log_prob(x)
-    lw_log_probs2 = lw_skew_distr2.log_prob(x)
+    lw_log_probs = lw_tail_distr.log_prob(x)
+    lw_log_probs2 = lw_tail_distr2.log_prob(x)
     np.testing.assert_allclose(lw_log_probs2.numpy(), lw_log_probs.numpy(), atol=eps)
+
+
+@pytest.mark.parametrize(
+    "distr_constr,lambertw_distr_constr,params,delta,eps",
+    [
+        (
+            torch.distributions.Normal,
+            td.TailLambertWNormal,
+            {"loc": 0.0, "scale": 1.0},
+            0.1,
+            1e-6,
+        ),
+        (
+            torch.distributions.LogNormal,
+            td.TailLambertWLogNormal,
+            {"loc": 0.0, "scale": 1.0},
+            0.1,
+            1e-6,
+        ),
+        (
+            torch.distributions.Exponential,
+            td.TailLambertWExponential,
+            {"rate": 2.0},
+            0.1,
+            1e-6,
+        ),
+        (
+            torch.distributions.Weibull,
+            td.TailLambertWWeibull,
+            {"concentration": 2.0, "scale": 1.0},
+            0.1,
+            1e-6,
+        ),
+        (
+            torch.distributions.Gamma,
+            td.TailLambertWGamma,
+            {"concentration": 2.0, "rate": 1.0},
+            0.1,
+            1e-6,
+        ),
+    ],
+)
+def test_args_tail_lw_distr(distr_constr, lambertw_distr_constr, params, delta, eps):
+    _ = distr_constr(**params)
+    base_param_names = list(params.keys())
+
+    lw_tail_distr = lambertw_distr_constr(tailweight=delta, **params)
+
+    tparam_names = base_param_names + ["tailweight"]
+    assert set(tparam_names) == set(lw_tail_distr.arg_constraints)
+
+
+@pytest.mark.parametrize(
+    "distr_constr,lambertw_distr_constr,params,gamma,eps",
+    [
+        (
+            torch.distributions.Normal,
+            td.SkewLambertWNormal,
+            {"loc": 0.0, "scale": 1.0},
+            0.1,
+            1e-6,
+        ),
+        (
+            torch.distributions.LogNormal,
+            td.SkewLambertWLogNormal,
+            {"loc": 0.0, "scale": 1.0},
+            0.1,
+            1e-6,
+        ),
+        (
+            torch.distributions.Exponential,
+            td.SkewLambertWExponential,
+            {"rate": 2.0},
+            0.1,
+            1e-6,
+        ),
+        (
+            torch.distributions.Weibull,
+            td.SkewLambertWWeibull,
+            {"concentration": 2.0, "scale": 1.0},
+            0.1,
+            1e-6,
+        ),
+        (
+            torch.distributions.Gamma,
+            td.SkewLambertWGamma,
+            {"concentration": 2.0, "rate": 1.0},
+            0.1,
+            1e-6,
+        ),
+    ],
+)
+def test_args_skew_lw_distr(distr_constr, lambertw_distr_constr, params, gamma, eps):
+    _ = distr_constr(**params)
+    base_param_names = list(params.keys())
+
+    lw_skew_distr = lambertw_distr_constr(skewweight=gamma, **params)
+
+    sparam_names = base_param_names + ["skewweight"]
+    assert set(sparam_names) == set(lw_skew_distr.arg_constraints)

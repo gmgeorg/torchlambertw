@@ -3,6 +3,7 @@
 import torch
 
 from . import base
+from . import utils
 
 
 class TailLambertWGamma(base.TailLambertWDistribution):
@@ -16,6 +17,9 @@ class TailLambertWGamma(base.TailLambertWDistribution):
         use_mean_variance: bool = True,
         **kwargs
     ):
+        concentration = utils.to_tensor(concentration)
+        rate = utils.to_tensor(rate)
+        tailweight = utils.to_tensor(tailweight)
         super().__init__(
             base_distribution=torch.distributions.Gamma,
             base_dist_args={"concentration": concentration, "rate": rate},
@@ -35,6 +39,9 @@ class SkewLambertWGamma(base.SkewLambertWDistribution):
         use_mean_variance: bool = True,
         **kwargs
     ):
+        concentration = utils.to_tensor(concentration)
+        rate = utils.to_tensor(rate)
+        skewweight = utils.to_tensor(skewweight)
         super().__init__(
             base_distribution=torch.distributions.Gamma,
             base_dist_args={"concentration": concentration, "rate": rate},
