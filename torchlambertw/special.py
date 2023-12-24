@@ -14,11 +14,13 @@ from typing import Optional, Tuple
 import numpy as np
 import torch
 
-_EPS = torch.finfo(torch.float64).eps
+_EPS = 1e-6
 # Constant for - 1 / e.  This is the lowest 'z' for which principal / non-principal W
 # is real valued (W(-1/e) = -1).  For any z < -1 / exp(1), W(z) = NA.
 _EXP_INV = np.exp(-1)
 _M_EXP_INV = -1 * _EXP_INV
+
+_MAX_ITER = 100
 
 
 def xexp(x: torch.Tensor) -> torch.Tensor:
@@ -74,8 +76,9 @@ def _halley_iteration(
     f = w - z * torch.exp(-w)
     delta = f / (w + 1.0 - 0.5 * (w + 2.0) * f / (w + 1.0))
     w_next = w - delta
-    converged = torch.abs(delta) <= tol * torch.abs(w_next)
-    should_stop_next = torch.all(converged) or (iteration_count >= 100)
+    converged = torch.abs(delta) <= tol
+    converged = converged | torch.isnan(w_next)
+    should_stop_next = torch.all(converged) or (iteration_count >= _MAX_ITER)
     return should_stop_next, w_next, z, delta, iteration_count + 1
 
 
@@ -106,11 +109,12 @@ def _fritsch_iteration(
     error = zn / wp1 * (1.0 + zn / q_minus_2zn)
     delta = torch.abs(error * w)
     converged = delta <= tol
-    should_stop_next = torch.all(converged) or (iteration_count >= 100)
+    converged = converged | torch.isnan(wp1)
+    should_stop_next = torch.all(converged) or (iteration_count >= _MAX_ITER)
     return should_stop_next, w * (1.0 + error), z, delta, iteration_count + 1
 
 
-def _lambertw_principal_branch_nonna(z):
+def _lambertw_principal_branch_nonna(z: torch.Tensor) -> torch.Tensor:
     """Computes principal branch of Lambert W function for input with nonna output."""
     # check if z > -1 (vectorized)
     w = torch.where(z >= _M_EXP_INV, _lambertw_winitzki_approx(z), z)
