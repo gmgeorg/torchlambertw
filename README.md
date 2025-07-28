@@ -18,7 +18,7 @@ See https://github.com/gmgeorg/torchlambertw/issues for remaining issues/TODOs.
 
 This library is a native implementation in `pytorch` of
 
- * the Lambert W function (`special.lambertw`)
+ * the Lambert W function (`special.lambertw`), and
 
  * Lambert W x F distributions (`torch.distributions`)
 
@@ -26,7 +26,7 @@ While this library is for now standalone, the goal is to get both the mathematic
 
 See also https://github.com/pytorch/pytorch/issues/108948.
 
-**IMPORTANT**: See also the accompanying [**pylambertw**](https://github.com/gmgeorg/pylambertw) 
+**IMPORTANT**: See also the accompanying [**pylambertw**](https://github.com/gmgeorg/pylambertw)
 module which uses `torchlambertw` under the hood to train distribution parameters and
 can be used to Gaussianize skewed, heavy-tailed data.
 
