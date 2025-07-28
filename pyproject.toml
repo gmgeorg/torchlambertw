@@ -20,9 +20,10 @@ ruff = "^0.12.5"
 
 [tool.ruff]
 line-length = 100
-ignore-init-module-imports = true
-ignore = ["E501", "F403"]
 fix = true
+
+[tool.ruff.lint]
+ignore = ["E501", "F403"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
