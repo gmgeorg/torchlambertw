@@ -36,7 +36,7 @@ repos:
       language: system
       stages: [push]
 -   repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.183
+    rev: v0.4.10
     hooks:
       - id: ruff
 #-   repo: https://github.com/pycqa/pydocstyle
