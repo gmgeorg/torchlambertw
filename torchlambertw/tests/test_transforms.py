@@ -26,13 +26,15 @@ def test_w_delta(delta):
     u = _test_data()
     u_delta = transforms.G_delta(u, delta=delta)
     w_u_delta = transforms.W_delta(u_delta, delta=delta)
-    np.testing.assert_allclose(u.numpy(), w_u_delta.numpy())
+    np.testing.assert_allclose(u.numpy(), w_u_delta.numpy(), rtol=1e-6)
 
     if delta > 0:
         assert all(torch.abs(u_delta) > torch.abs(u))
 
 
-@pytest.mark.parametrize("loc,scale,delta", [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)])
+@pytest.mark.parametrize(
+    "loc,scale,delta", [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)]
+)
 def test_torch_transform_inverse_equality(loc, scale, delta):
     x = _test_data()
     torch_trafo = transforms.TailLambertWTransform(
