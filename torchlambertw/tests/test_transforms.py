@@ -1,6 +1,5 @@
 """Module for testing torch transforms module."""
 
-
 import numpy as np
 import pytest
 import torch
@@ -33,9 +32,7 @@ def test_w_delta(delta):
         assert all(torch.abs(u_delta) > torch.abs(u))
 
 
-@pytest.mark.parametrize(
-    "loc,scale,delta", [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)]
-)
+@pytest.mark.parametrize("loc,scale,delta", [(0.0, 1.0, 0.5), (0.4, 2.0, 0.1), (0.4, 2.0, 0.001)])
 def test_torch_transform_inverse_equality(loc, scale, delta):
     x = _test_data()
     torch_trafo = transforms.TailLambertWTransform(

@@ -137,8 +137,8 @@ def _lambertw_principal_branch(z: torch.Tensor) -> torch.Tensor:
     return torch.where(torch.isposinf(z), torch.inf, w)
 
 
-def _lambertw_nonprincipal_branch_nonna(z: torch.Tensor) -> torch.Tensor:
-    """Computes the non-principal branch of z; only defined for z in [-1/exp(1), 0)."""
+def _lambertw_nonprincipal_branch_nonna_init(z: torch.Tensor) -> torch.Tensor:
+    """Initializes the non-principal branch approximation given eq (4.19) in Corless et al. 1996"""
     # See eq (4.19) of Corless et al. (1996).
     L1 = torch.log(-z)
     L1_sq = L1 * L1
@@ -155,6 +155,22 @@ def _lambertw_nonprincipal_branch_nonna(z: torch.Tensor) -> torch.Tensor:
         + (L3 * ((6.0 - 9.0 * L2 + 2 * L2_sq) / 6.0 * L1_sq))
     )
 
+    # This is added here because of findings in
+    # https://github.com/gmgeorg/torchlambertw/issues/4
+    #
+    # For z > -0.25, W_-1(z) < -2.
+    z_gt_025_and_w_gt_minus2_mask = (z > -0.25) & (w > -0.2)
+    w = torch.where(z_gt_025_and_w_gt_minus2_mask, -2.0 * torch.ones_like(z), w)
+
+    # For z > -0.01, W_-1(z) < -6.
+    z_gt_001_and_w_gt_minus6_mask = (z > -0.01) & (w > -0.6)
+    w = torch.where(z_gt_001_and_w_gt_minus6_mask, -6.0 * torch.ones_like(z), w)
+    return w
+
+
+def _lambertw_nonprincipal_branch_nonna(z: torch.Tensor) -> torch.Tensor:
+    """Computes the non-principal branch of z; only defined for z in [-1/exp(1), 0)."""
+    w = _lambertw_nonprincipal_branch_nonna_init(z)
     stop_condition = False
     counter = 0
     while not stop_condition:

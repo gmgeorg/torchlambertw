@@ -1,8 +1,29 @@
+[tool.poetry]
+name = "torchlambertw"
+version = "0.0.4"
+description = "torch implementation of Lambert W function and Lambert W x F distributions."
+authors = ["Georg M. Goerg <im@gmge.org>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "torchlambertw"}]
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+numpy = ">=1.0.0"
+scipy = ">=1.0.0"
+pytest = ">=6.1.1"
+torch = ">=2.0.1"
+
+[tool.poetry.group.dev.dependencies]
+matplotlib = "^3.10.3"
+ruff = "^0.12.5"
+
 [tool.ruff]
 line-length = 100
 ignore-init-module-imports = true
-
-# Never enforce `E501` (line length violations).
-ignore = ['E501', 'F403']
-
+ignore = ["E501", "F403"]
 fix = true
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

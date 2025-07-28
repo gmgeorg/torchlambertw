@@ -16,7 +16,7 @@ class TailLambertWWeibull(base.TailLambertWDistribution):
         scale: torch.Tensor,
         tailweight: torch.Tensor,
         use_mean_variance: bool = True,
-        **kwargs
+        **kwargs,
     ):
         concentration = utils.to_tensor(concentration)
         scale = utils.to_tensor(scale)
@@ -41,7 +41,7 @@ class SkewLambertWWeibull(base.SkewLambertWDistribution):
         scale: torch.Tensor,
         skewweight: torch.Tensor,
         use_mean_variance: bool = True,
-        **kwargs
+        **kwargs,
     ):
         concentration = utils.to_tensor(concentration)
         scale = utils.to_tensor(scale)

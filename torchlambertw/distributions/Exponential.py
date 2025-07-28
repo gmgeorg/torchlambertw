@@ -10,11 +10,7 @@ class TailLambertWExponential(base.TailLambertWDistribution):
     """Tail Lambert W x Exponential distribution to use as args."""
 
     def __init__(
-        self,
-        rate: torch.Tensor,
-        tailweight: torch.Tensor,
-        use_mean_variance: bool = True,
-        **kwargs
+        self, rate: torch.Tensor, tailweight: torch.Tensor, use_mean_variance: bool = True, **kwargs
     ):
         rate = utils.to_tensor(rate)
         tailweight = utils.to_tensor(tailweight)
@@ -46,11 +42,7 @@ class SkewLambertWExponential(base.SkewLambertWDistribution):
     """
 
     def __init__(
-        self,
-        rate: torch.Tensor,
-        skewweight: torch.Tensor,
-        use_mean_variance: bool = True,
-        **kwargs
+        self, rate: torch.Tensor, skewweight: torch.Tensor, use_mean_variance: bool = True, **kwargs
     ):
         rate = utils.to_tensor(rate)
         skewweight = utils.to_tensor(skewweight)
@@ -76,8 +68,6 @@ class SkewLambertWExponential(base.SkewLambertWDistribution):
         # See p13 in https://arxiv.org/pdf/2307.05644.pdf
         # variance = EY^2 - (mean)**2
         denom = 1.0 - 2 * self.skewweight
-        second_moment = 2.0 / (
-            self.base_dist.rate.pow(2.0) * torch.pow(denom, 2.0 + 1.0)
-        )
+        second_moment = 2.0 / (self.base_dist.rate.pow(2.0) * torch.pow(denom, 2.0 + 1.0))
         variance = second_moment - self.mean**2
         return variance

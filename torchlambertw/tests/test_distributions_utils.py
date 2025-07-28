@@ -1,6 +1,5 @@
 """Module for testing distribution/utils.py module."""
 
-
 import pytest
 
 from torchlambertw.distributions import utils
@@ -24,13 +23,9 @@ def test_is_location_family(dist_name, expected):
         ("Exponential", {"rate": 2.0}, None, None, True, (0.0, 1.0 / 2.0)),
     ],
 )
-def test_update_shift_scale(
-    dist_name, base_dist_args, shift, scale, use_mean_variance, expected
-):
+def test_update_shift_scale(dist_name, base_dist_args, shift, scale, use_mean_variance, expected):
     distr = utils.get_distribution_constructor(dist_name)(**base_dist_args)
-    result = utils.update_shift_scale(
-        shift, scale, distr, use_mean_variance=use_mean_variance
-    )
+    result = utils.update_shift_scale(shift, scale, distr, use_mean_variance=use_mean_variance)
     exptected_tensor = tuple([utils.to_tensor(v) for v in expected])
     assert result == exptected_tensor
 
@@ -42,9 +37,7 @@ def test_update_shift_scale(
         ("Exponential", {"rate": 3.0}, 1 / 3.0, 1 / 3.0),
     ],
 )
-def test_get_distribution_constructor(
-    dist_name, params, expected_mean, expected_stddev
-):
+def test_get_distribution_constructor(dist_name, params, expected_mean, expected_stddev):
     distr_constr = utils.get_distribution_constructor(dist_name)
     distr = distr_constr(**params)
     assert distr.mean.numpy() == pytest.approx(expected_mean, 1e-5)

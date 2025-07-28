@@ -26,6 +26,7 @@ _LAMBERTW_0_SPECIAL_VALUES = [
 _LAMBERTW_M1_SPECIAL_VALUES = [
     (special._M_EXP_INV, -1.0),
     (-0.1, -3.577152063957297),  # compared to scipy.special.lambertw
+    (-0.0009, -9.236251966692597),  # see https://github.com/gmgeorg/torchlambertw/issues/4
     (np.inf, np.nan),
     (0.0, -np.inf),
 ]
@@ -86,10 +87,6 @@ def test_speed():
         _ = special.lambertw(x_data)
 
     # Measure the execution time using timeit
-    execution_time = timeit.timeit(
-        _run_lambertw, number=100
-    )  # Adjust the number of runs as needed
+    execution_time = timeit.timeit(_run_lambertw, number=100)  # Adjust the number of runs as needed
     print(execution_time)
-    assert (
-        execution_time < 0.05
-    ), f"Execution time exceeded 100ms: {execution_time:.4f} seconds"
+    assert execution_time < 0.05, f"Execution time exceeded 100ms: {execution_time:.4f} seconds"

@@ -16,7 +16,7 @@ class TailLambertWLogNormal(base.TailLambertWDistribution):
         scale: torch.Tensor,
         tailweight: torch.Tensor,
         use_mean_variance: bool = True,
-        **kwargs
+        **kwargs,
     ):
         loc = utils.to_tensor(loc)
         scale = utils.to_tensor(scale)
@@ -28,7 +28,7 @@ class TailLambertWLogNormal(base.TailLambertWDistribution):
             base_dist_args={"loc": loc, "scale": scale},
             use_mean_variance=use_mean_variance,
             tailweight=tailweight,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -41,7 +41,7 @@ class SkewLambertWLogNormal(base.SkewLambertWDistribution):
         scale: torch.Tensor,
         skewweight: torch.Tensor,
         use_mean_variance: bool = True,
-        **kwargs
+        **kwargs,
     ):
         loc = utils.to_tensor(loc)
         scale = utils.to_tensor(scale)
@@ -53,5 +53,5 @@ class SkewLambertWLogNormal(base.SkewLambertWDistribution):
             base_dist_args={"loc": loc, "scale": scale},
             use_mean_variance=use_mean_variance,
             skewweight=skewweight,
-            **kwargs
+            **kwargs,
         )
