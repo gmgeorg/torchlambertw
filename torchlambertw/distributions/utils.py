@@ -38,9 +38,7 @@ def get_distribution_args(
     """Gets the parameter names for a distribution constructor."""
     constructor_signature = inspect.signature(distribution_constructur.__init__)
     args = [
-        param
-        for param in constructor_signature.parameters.keys()
-        if param not in _DROP_ARGS_NAMES
+        param for param in constructor_signature.parameters.keys() if param not in _DROP_ARGS_NAMES
     ]
 
     return args

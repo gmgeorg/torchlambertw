@@ -44,9 +44,7 @@ def G_delta(u: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
     return u * torch.exp(delta / 2.0 * torch.pow(u, 2.0))
 
 
-def G_delta_alpha(
-    u: torch.Tensor, delta: torch.Tensor, alpha: torch.Tensor
-) -> torch.Tensor:
+def G_delta_alpha(u: torch.Tensor, delta: torch.Tensor, alpha: torch.Tensor) -> torch.Tensor:
     """Computes base transform for heavy-tailed Lambert W x F distributions (Goerg 2015)."""
     return u * torch.exp(delta / 2.0 * ((u**2.0) ** alpha))
 
@@ -68,17 +66,14 @@ class TailLambertWTransform(td.transforms.Transform):
     r"""
     Transform via the mapping :math:`y = x * \exp(delta / 2 * x**2)`.
     """
+
     domain = td.constraints.real
     codomain = td.constraints.real
     bijective = True
     sign = +1
 
     def __init__(
-        self,
-        shift: torch.Tensor,
-        scale: torch.Tensor,
-        tailweight: torch.Tensor,
-        **kwargs
+        self, shift: torch.Tensor, scale: torch.Tensor, tailweight: torch.Tensor, **kwargs
     ):
         super().__init__(**kwargs)
         self.shift = shift
@@ -107,26 +102,21 @@ class TailLambertWTransform(td.transforms.Transform):
     def log_abs_det_jacobian(self, x, y):
         u_sq = self._normalize(x).pow(2.0)
         # absolute value not needed as all terms here are >= 0.
-        return torch.log(
-            (1.0 + self.tailweight * u_sq) * torch.exp(0.5 * self.tailweight * u_sq)
-        )
+        return torch.log((1.0 + self.tailweight * u_sq) * torch.exp(0.5 * self.tailweight * u_sq))
 
 
 class SkewLambertWTransform(td.transforms.Transform):
     r"""
     Transform via the mapping :math:`y = x * \exp(gamma * x)`.
     """
+
     domain = td.constraints.real
     codomain = td.constraints.real
     bijective = False
     sign = +1
 
     def __init__(
-        self,
-        shift: torch.Tensor,
-        scale: torch.Tensor,
-        skewweight: torch.Tensor,
-        **kwargs
+        self, shift: torch.Tensor, scale: torch.Tensor, skewweight: torch.Tensor, **kwargs
     ):
         super().__init__(**kwargs)
         self.shift = shift
@@ -161,6 +151,4 @@ class SkewLambertWTransform(td.transforms.Transform):
 
     def log_abs_det_jacobian(self, x, y):
         u = self._normalize(x)
-        return torch.log(
-            torch.abs((self.skewweight * u + 1.0) * torch.exp(self.skewweight * u))
-        )
+        return torch.log(torch.abs((self.skewweight * u + 1.0) * torch.exp(self.skewweight * u)))

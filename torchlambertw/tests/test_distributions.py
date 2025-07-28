@@ -1,6 +1,5 @@
 """Module for testing preprocessing module."""
 
-
 import numpy as np
 import pytest
 import torch
@@ -12,9 +11,7 @@ import torch
 from torchlambertw import distributions as td
 
 
-@pytest.mark.parametrize(
-    "loc,scale,delta,eps", [(0.0, 1.0, 0.0, 1e-6), (0.4, 2.0, 0.0, 1e-6)]
-)
+@pytest.mark.parametrize("loc,scale,delta,eps", [(0.0, 1.0, 0.0, 1e-6), (0.4, 2.0, 0.0, 1e-6)])
 def test_identity_h(loc, scale, delta, eps):
     distr = torch.distributions.Normal(loc=loc, scale=scale)
     lw_tail_distr = td.base.TailLambertWDistribution(
@@ -31,9 +28,7 @@ def test_identity_h(loc, scale, delta, eps):
     np.testing.assert_allclose(log_probs.numpy(), lw_log_probs.numpy(), atol=eps)
 
 
-@pytest.mark.parametrize(
-    "loc,scale,gamma,eps", [(0.0, 1.0, 0.0, 1e-6), (0.4, 2.0, 0.0, 1e-6)]
-)
+@pytest.mark.parametrize("loc,scale,gamma,eps", [(0.0, 1.0, 0.0, 1e-6), (0.4, 2.0, 0.0, 1e-6)])
 def test_identity_s(loc, scale, gamma, eps):
     distr = torch.distributions.Normal(loc=loc, scale=scale)
     lw_skew_distr = td.base.SkewLambertWDistribution(

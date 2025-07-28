@@ -29,6 +29,7 @@ class TailLambertWDistribution(td.transformed_distribution.TransformedDistributi
         tailweight (float or Tensor): tailweight ("delta") of the Lambert W x F distribution.
           If 0., then it reduces to a F(loc, scale) distribution.
     """
+
     has_rsample = True
 
     def __init__(
@@ -110,6 +111,7 @@ class SkewLambertWDistribution(td.transformed_distribution.TransformedDistributi
         tailweight (float or Tensor): tailweight ("delta") of the Lambert W x F distribution.
           If 0., then it reduces to a F(shift, scale) distribution.
     """
+
     has_rsample = True
 
     def __init__(

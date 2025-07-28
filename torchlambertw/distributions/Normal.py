@@ -59,9 +59,7 @@ class TailLambertWNormal(base.TailLambertWDistribution):
 
     @property
     def mean(self):
-        loc_abs_times_tailweight = (self.base_dist.loc.abs() + 1) * (
-            1.0 - self.tailweight
-        )
+        loc_abs_times_tailweight = (self.base_dist.loc.abs() + 1) * (1.0 - self.tailweight)
         return torch.where(loc_abs_times_tailweight > 0, self.base_dist.loc, torch.nan)
 
     @property
